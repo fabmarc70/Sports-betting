@@ -14,6 +14,7 @@ pip install selenium chromedriver-autoinstaller fake-useragent -q
 pip install unidecode numpy beautifulsoup4 lxml termcolor colorama -q
 pip install python-dateutil stopit tabulate pillow demjson3 scipy -q
 pip install selenium-wire pyopenssl websockets -q
+pip install pywin32 -q
 
 echo.
 echo ================================================
