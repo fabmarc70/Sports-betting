@@ -480,11 +480,16 @@ function updateCalc(){
 function renderFreebets(fbs){
   const tb=document.getElementById('fb-tbody');
   if(!fbs.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:32px;color:var(--muted)">Aucune donnée</td></tr>';return;}
+  const header=document.querySelector('#tab-freebets thead tr');
+  const isReal=fbs[0]&&fbs[0]._real;
+  if(header) header.innerHTML=isReal
+    ?'<th>Bookmaker</th><th>Sport</th><th>Participation</th><th>Gain moyen / arb</th>'
+    :'<th>Bookmaker</th><th>Sport</th><th>Meilleur match</th><th>Taux de conversion estimé</th>';
   tb.innerHTML=fbs.map(r=>`<tr>
     <td><strong>${r.site}</strong></td>
     <td><span class="pill blue">${sportFr(r.sport)}</span></td>
     <td style="color:var(--muted)">${r.match||'—'}</td>
-    <td class="arb-gain">${r.taux}%</td>
+    <td class="arb-gain">${isReal?('+€'+r.taux):r.taux+'%'}</td>
   </tr>`).join('');
 }
 
@@ -555,8 +560,37 @@ async function fetchData(){
     const bArr=Object.entries(bg).map(([n,g])=>({name:n,gain:Math.round(g)})).sort((a,b)=>b.gain-a.gain);
     const bc=['#4f8ef7','#34d399','#a78bfa','#f59e0b','#f87171','#38bdf8','#fb923c'];
     renderBars('bookmaker-bars',bArr,(_,i)=>bc[i%bc.length],b=>b.gain>0?'+€'+b.gain:'€0',b=>b.name);
-    renderBars('success-bars',(d.freebets||[]).slice(0,6),()=>'var(--accent)',b=>b.taux,b=>b.site);
-    renderLine([0,4,8,12,18,22,28,32,38,44,52,58,62,68,78,86,95,100]);
+    // Stats réelles bookmakers depuis les arbitrages actuels
+    const bmStats={};
+    (d.arbitrages||[]).forEach(a=>{
+      a.bookmakers.split(' / ').forEach(b=>{
+        if(!bmStats[b]) bmStats[b]={appearances:0,totalTrj:0};
+        bmStats[b].appearances++;
+        bmStats[b].totalTrj+=a.trj||100;
+      });
+    });
+    const bmArr=Object.entries(bmStats)
+      .map(([n,s])=>({name:n,avgTrj:Math.round(s.totalTrj/s.appearances*10)/10,count:s.appearances}))
+      .sort((a,b)=>b.avgTrj-a.avgTrj);
+    renderBars('success-bars',bmArr,()=>'var(--accent)',b=>b.avgTrj+'%',b=>`${b.name} (${b.count}x)`);
+
+    // Graphe basé sur l'historique réel
+    fetchHistoryForStats();
+
+    // Freebets réels : performances des bookmakers depuis les arbitrages
+    const fbStats={};
+    (d.arbitrages||[]).forEach(a=>{
+      a.bookmakers.split(' / ').forEach(b=>{
+        if(!fbStats[b]) fbStats[b]={count:0,totalGain:0,bestOdd:0};
+        fbStats[b].count++;
+        fbStats[b].totalGain+=a.gain_100||0;
+        (a.breakdown||[]).filter(x=>x.bookmaker===b).forEach(x=>{fbStats[b].bestOdd=Math.max(fbStats[b].bestOdd,x.odd||0);});
+      });
+    });
+    const fbArr=Object.entries(fbStats)
+      .map(([name,s])=>({site:name,sport:'arbitrage',match:`${s.count} arbitrage${s.count>1?'s':''}`,taux:s.count>0?Math.round(s.totalGain/s.count*10)/10:0,_real:true}))
+      .sort((a,b)=>b.taux-a.taux);
+    if(fbArr.length) renderFreebets(fbArr);
 
     pill.className='status-pill online';pill.textContent='● En ligne';
     const t=d.last_update?new Date(d.last_update).toLocaleTimeString('fr-FR'):'';
@@ -614,6 +648,36 @@ function filterHistory(){
       <td>${e.trj}%</td>
     </tr>`;
   }).join('');
+}
+
+async function fetchHistoryForStats(){
+  const url=(localStorage.getItem('sb_api_url')||'').trim();
+  if(!url) return;
+  try{
+    const res=await fetch(url+'/api/history',{signal:AbortSignal.timeout(10000)});
+    if(!res.ok) return;
+    const d=await res.json();
+    const entries=d.entries||[];
+    if(!entries.length) return;
+    // Groupe par jour et cumule gain_100
+    const byDay={};
+    entries.forEach(e=>{
+      const day=(e.detected_at||e.date||'').slice(0,10);
+      if(!day) return;
+      byDay[day]=(byDay[day]||0)+(e.gain_100||0);
+    });
+    const days=Object.keys(byDay).sort().slice(-30);
+    if(days.length<2) return;
+    // Cumul
+    let cum=0;
+    const vals=days.map(d=>{cum+=byDay[d];return Math.round(cum*100)/100;});
+    renderLine(vals);
+    // Légende sous le graphe
+    const svg=document.getElementById('line-chart');
+    const lastGain=vals[vals.length-1];
+    const title=svg.parentElement.querySelector('.section-title');
+    if(title) title.textContent=`Évolution de la plus-value (${days.length}j) — Cumulé: +€${lastGain}`;
+  }catch(e){}
 }
 
 fetchData();
