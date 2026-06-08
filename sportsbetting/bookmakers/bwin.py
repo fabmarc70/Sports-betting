@@ -9,7 +9,9 @@ import re
 import urllib
 
 import dateutil.parser
-import seleniumwire.webdriver
+import selenium.webdriver as seleniumwire_wd
+class seleniumwire:
+    webdriver = seleniumwire_wd
 
 import sportsbetting as sb
 from sportsbetting.auxiliary_functions import reverse_match_odds, truncate_datetime

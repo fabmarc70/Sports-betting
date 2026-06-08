@@ -8,7 +8,9 @@ import os
 import re
 
 import requests
-import seleniumwire
+import selenium.webdriver as seleniumwire_wd
+class seleniumwire:
+    webdriver = seleniumwire_wd
 
 
 import sportsbetting as sb

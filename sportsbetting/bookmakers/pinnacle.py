@@ -9,7 +9,9 @@ import urllib
 import time
 
 import dateutil.parser
-import seleniumwire
+import selenium.webdriver as seleniumwire_wd
+class seleniumwire:
+    webdriver = seleniumwire_wd
 
 from collections import defaultdict
 
