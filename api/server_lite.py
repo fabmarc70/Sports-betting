@@ -10,7 +10,16 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+@app.after_request
+def add_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+    response.headers['Access-Control-Allow-Methods'] = 'GET,OPTIONS'
+    # Required by Cloudflare Tunnel to allow browser cross-origin requests
+    response.headers['CF-Access-Allow-Authd-Requests'] = 'false'
+    return response
 
 # ─────────────────────────────────────────────
 # CONFIGURATION — mettez votre clé API ici
