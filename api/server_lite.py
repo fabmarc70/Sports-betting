@@ -288,7 +288,7 @@ if __name__ == "__main__":
         print("  ⚠  Clé API manquante — consultez les instructions ci-dessous")
     else:
         print(f"  Clé API: {'*' * (len(ODDS_API_KEY)-4)}{ODDS_API_KEY[-4:]}")
-    print(f"  Sports actifs: {', '.join(ACTIVE_SPORTS)}")
+    print(f"  Sports actifs: {', '.join(SPORT_GROUPS.keys())}")
     print("=" * 55)
     t = threading.Thread(target=refresh_loop, daemon=True)
     t.start()
