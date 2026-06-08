@@ -1,42 +1,35 @@
 @echo off
-title SportsBetting - Lancement complet
+title SportsBetting - Lancement
 cd /d "%~dp0"
 
 echo ================================================
-echo   SportsBetting - Lancement automatique
+echo   SportsBetting - The Odds API (server_lite)
 echo ================================================
 echo.
 echo Mise a jour depuis GitHub...
 git pull origin master
 
 echo.
-echo Installation des dependances...
-pip install flask flask-cors requests -q
+echo Installation Flask...
+pip install flask flask-cors requests -q 2>nul
 
 echo.
-echo Demarrage du serveur API dans une nouvelle fenetre...
-start "SportsBetting API" cmd /k "cd /d "%~dp0" && python api\server_lite.py"
+echo Demarrage du serveur (The Odds API)...
+start "SportsBetting-API-LITE" cmd /k "cd /d %~dp0 && echo Serveur server_lite.py en cours... && python api\server_lite.py"
 
-echo Attente du demarrage du serveur (5 secondes)...
+echo Attente 5 secondes...
 timeout /t 5 /nobreak > nul
 
-echo Demarrage du tunnel Cloudflare dans une nouvelle fenetre...
-start "SportsBetting Tunnel" cmd /k "cd /d "%~dp0\api" && tunnel.bat"
+echo Demarrage tunnel Cloudflare...
+start "SportsBetting-Tunnel" cmd /k "cd /d %~dp0\api && tunnel.bat"
 
 echo.
 echo ================================================
-echo   TOUT EST LANCE !
+echo   LANCE ! Attendez la ligne :
+echo   [HH:MM] Raffraichi - XX arbitrages
+echo   dans la fenetre SportsBetting-API-LITE
 echo.
-echo   1. Attendez que le tunnel affiche son URL
-echo      (ex: https://xxxxx.trycloudflare.com)
-echo.
-echo   2. Ouvrez le dashboard :
-echo      https://sports-betting-xi-nine.vercel.app
-echo.
-echo   3. Double-cliquez sur le logo pour entrer l'URL
-echo      du tunnel si necessaire.
-echo.
-echo   Ne fermez pas les fenetres "API" et "Tunnel".
+echo   Puis allez sur :
+echo   https://sports-betting-xi-nine.vercel.app
 echo ================================================
-echo.
 pause
