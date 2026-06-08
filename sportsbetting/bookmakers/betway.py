@@ -5,7 +5,10 @@ Betway odds scraper
 import re
 
 import dateutil
-import demjson
+try:
+    import demjson3 as demjson
+except ImportError:
+    import demjson
 import requests
 
 import sportsbetting as sb
