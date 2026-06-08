@@ -17,7 +17,7 @@ from flask_cors import CORS
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import sportsbetting as sb
-from sportsbetting.user_functions import best_match_under_conditions
+from sportsbetting.user_functions import parse_competitions
 from sportsbetting.basic_functions import gain
 
 app = Flask(__name__)
@@ -138,12 +138,17 @@ def refresh_loop():
             with CACHE_LOCK:
                 CACHE["status"] = "refreshing"
 
+            BOOKMAKERS = ["betclic", "winamax", "unibet", "pmu", "bwin", "parionssport", "zebet", "netbet"]
+            COMPETITIONS = {
+                "football": ["Ligue des Nations", "Coupe du Monde des Clubs", "Copa America", "Copa Libertadores", "Ligue Europa"],
+                "basketball": ["Etats-Unis - NBA"],
+                "tennis": ["tennis"],
+            }
             print("  Chargement des cotes bookmakers (Chrome)...")
-            for sport in ["football", "tennis", "basketball"]:
+            for sport, competitions in COMPETITIONS.items():
                 try:
-                    print(f"  Scan {sport}...")
-                    best_match_under_conditions("betclic", 1.01, 100, sport, one_site=False)
-                    nb = sum(len(v) for v in sb.ODDS.get(sport, {}).values()) if hasattr(sb.ODDS.get(sport, {}), 'values') else len(sb.ODDS.get(sport, {}))
+                    print(f"  Scan {sport}: {competitions}...")
+                    parse_competitions(competitions, sport, *BOOKMAKERS)
                     print(f"    → {len(sb.ODDS.get(sport, {}))} matchs chargés pour {sport}")
                 except Exception as e:
                     print(f"    Erreur {sport}: {e}")
