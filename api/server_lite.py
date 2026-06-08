@@ -66,6 +66,9 @@ def fetch_odds(sport_key):
             return None, "quota"
         remaining = r.headers.get("x-requests-remaining", "?")
         data = r.json()
+        if not isinstance(data, list):
+            print(f"  Réponse inattendue: {data}")
+            return [], remaining
         return data, remaining
     except Exception as e:
         print(f"  Erreur réseau: {e}")
