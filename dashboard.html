@@ -99,18 +99,18 @@
 
 <header>
   <div>
-    <div class="logo">⚽ SportsBetting</div>
+    <div class="logo" ondblclick="document.getElementById('api-banner').style.display=document.getElementById('api-banner').style.display==='none'?'flex':'none'" style="cursor:default;">⚽ SportsBetting</div>
     <div class="subtitle">Tableau de bord – Arbitrage &amp; Freebets</div>
   </div>
   <span class="status-pill demo" id="status-pill">● Démo</span>
 </header>
 
-<!-- Barre de configuration API (toujours visible) -->
-<div id="api-banner">
+<!-- Barre de configuration API (masquée — accès admin via double-clic sur le logo) -->
+<div id="api-banner" style="display:none;">
   <label>🔗 URL de votre API :</label>
   <input id="api-input" type="text" placeholder="https://xxxxx.trycloudflare.com" />
   <button id="api-save" onclick="saveApi()">Connecter</button>
-  <span id="api-hint">Lancez <code>api\server_lite.py</code> puis <code>api\tunnel.bat</code> sur votre PC, et collez l'URL ici.</span>
+  <span id="api-hint">Collez ici l'URL du tunnel Cloudflare.</span>
 </div>
 
 <main>
