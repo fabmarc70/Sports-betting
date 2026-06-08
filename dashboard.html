@@ -76,6 +76,32 @@
     .pill.blue{background:#0a1a3a;color:var(--accent);}
     .arb-gain{color:var(--accent2);font-weight:700;}
 
+    /* Modal calculateur */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
+    .modal-title{font-size:1.1rem;font-weight:700;margin-bottom:4px;}
+    .modal-sub{color:var(--muted);font-size:.82rem;margin-bottom:20px;}
+    .stake-input-row{display:flex;align-items:center;gap:10px;margin-bottom:22px;}
+    .stake-input-row label{color:var(--muted);font-size:.85rem;white-space:nowrap;}
+    .stake-input-row input{background:var(--surface2);border:2px solid var(--accent);color:var(--text);padding:10px 14px;border-radius:10px;font-size:1.1rem;font-weight:700;width:130px;outline:none;text-align:center;}
+    .stake-input-row input:focus{border-color:var(--accent2);}
+    .calc-table{width:100%;border-collapse:collapse;margin-bottom:18px;}
+    .calc-table th{text-align:left;padding:8px 10px;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);}
+    .calc-table td{padding:10px 10px;border-bottom:1px solid var(--border);font-size:.9rem;}
+    .calc-table tr:last-child td{border-bottom:none;}
+    .outcome-name{font-weight:600;}
+    .bm-name{color:var(--muted);font-size:.8rem;}
+    .stake-amt{font-weight:700;color:var(--accent);font-size:1rem;}
+    .return-amt{color:var(--accent2);font-weight:600;}
+    .profit-box{background:#1a3a2a;border:1px solid var(--accent2);border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+    .profit-box .label{color:var(--accent2);font-size:.82rem;font-weight:600;}
+    .profit-box .value{color:var(--accent2);font-size:1.4rem;font-weight:800;}
+    .modal-close{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 20px;border-radius:8px;cursor:pointer;font-size:.85rem;}
+    .modal-close:hover{background:var(--border);}
+    .clickable-row{cursor:pointer;}
+    .clickable-row:hover td{background:var(--surface2) !important;}
+
     /* Bar chart */
     .bar-chart{display:flex;flex-direction:column;gap:10px;}
     .bar-row{display:flex;align-items:center;gap:10px;font-size:.82rem;}
@@ -190,6 +216,27 @@
   </div>
 </main>
 
+<!-- Modal calculateur de mise -->
+<div class="modal-overlay" id="calc-modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-title" id="calc-match">—</div>
+    <div class="modal-sub" id="calc-sport">—</div>
+    <div class="stake-input-row">
+      <label>Mise totale à répartir :</label>
+      <input type="number" id="calc-stake" value="100" min="1" oninput="updateCalc()"> €
+    </div>
+    <table class="calc-table">
+      <thead><tr><th>Issue</th><th>Bookmaker</th><th>Cote</th><th>Mise exacte</th><th>Retour si gagne</th></tr></thead>
+      <tbody id="calc-tbody"></tbody>
+    </table>
+    <div class="profit-box">
+      <div><div class="label">Profit garanti quel que soit le résultat</div><div style="color:var(--muted);font-size:.75rem;margin-top:2px">Retour minimum − Mise totale</div></div>
+      <div class="value" id="calc-profit">—</div>
+    </div>
+    <button class="modal-close" onclick="closeModal()">Fermer</button>
+  </div>
+</div>
+
 <footer id="footer-status">SportsBetting Dashboard · En attente de connexion API</footer>
 
 <script>
@@ -221,11 +268,14 @@ function saveApi(){
 }
 
 // ── Rendu ──
+let _arbData = [];
+
 function renderArbitrages(arbs){
+  _arbData = arbs;
   const tb=document.getElementById('arb-tbody');
   if(!arbs.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">Aucun arbitrage détecté</td></tr>';return;}
-  tb.innerHTML=arbs.map(r=>`<tr>
-    <td><strong>${r.match}</strong></td>
+  tb.innerHTML=arbs.map((r,i)=>`<tr class="clickable-row" onclick="openCalc(${i})" title="Cliquez pour calculer les mises exactes">
+    <td><strong>${r.match}</strong><div style="font-size:.72rem;color:var(--accent);margin-top:2px">🧮 Calculer les mises</div></td>
     <td><span class="pill blue">${r.sport}</span></td>
     <td style="color:var(--muted);font-size:.8rem">${r.bookmakers}</td>
     <td>${r.cotes}</td>
@@ -233,6 +283,48 @@ function renderArbitrages(arbs){
     <td>${r.trj}%</td>
     <td><span class="pill green">Live</span></td>
   </tr>`).join('');
+}
+
+// ── Calculateur de mise ──
+let _currentArb = null;
+
+function openCalc(idx){
+  _currentArb = _arbData[idx];
+  document.getElementById('calc-match').textContent = _currentArb.match;
+  document.getElementById('calc-sport').textContent = _currentArb.sport + ' · TRJ ' + _currentArb.trj + '%';
+  document.getElementById('calc-stake').value = 100;
+  updateCalc();
+  document.getElementById('calc-modal').classList.add('open');
+}
+
+function closeModal(){
+  document.getElementById('calc-modal').classList.remove('open');
+}
+
+function updateCalc(){
+  if(!_currentArb) return;
+  const total = parseFloat(document.getElementById('calc-stake').value) || 100;
+  const bd = _currentArb.breakdown || [];
+  const tb = document.getElementById('calc-tbody');
+  if(!bd.length){
+    tb.innerHTML='<tr><td colspan="5" style="color:var(--muted)">Données insuffisantes</td></tr>';
+    return;
+  }
+  let minReturn = Infinity;
+  tb.innerHTML = bd.map(row => {
+    const stake = Math.round(total * row.stake_pct) / 100;
+    const ret = Math.round(stake * row.odd * 100) / 100;
+    if(ret < minReturn) minReturn = ret;
+    return `<tr>
+      <td><div class="outcome-name">${row.outcome}</div></td>
+      <td><span class="bm-name">${row.bookmaker}</span></td>
+      <td><strong>${row.odd}</strong></td>
+      <td><span class="stake-amt">€${stake.toFixed(2)}</span></td>
+      <td><span class="return-amt">€${ret.toFixed(2)}</span></td>
+    </tr>`;
+  }).join('');
+  const profit = minReturn === Infinity ? 0 : (minReturn - total);
+  document.getElementById('calc-profit').textContent = (profit >= 0 ? '+' : '') + '€' + profit.toFixed(2);
 }
 
 function renderFreebets(fbs){
