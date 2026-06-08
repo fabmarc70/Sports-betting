@@ -301,184 +301,230 @@
 
 </main>
 
-<footer>Sports-betting dashboard — données simulées pour illustration · Aucune donnée réelle transmise</footer>
+<footer id="footer-status">SportsBetting Dashboard · Connexion à l'API en cours...</footer>
 
 <script>
+// ════════════════════════════════════════════════════
+//  CONFIGURATION — collez ici l'URL du tunnel Cloudflare
+//  après avoir lancé api/tunnel.bat
+// ════════════════════════════════════════════════════
+const API_URL = localStorage.getItem('sb_api_url') || null;
+
 // ── Tab navigation ──
 function switchTab(id) {
-  document.querySelectorAll('.tab').forEach((t, i) => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   const idx = ['arb','freebets','stats'].indexOf(id);
   document.querySelectorAll('.tab')[idx].classList.add('active');
   document.getElementById('tab-' + id).classList.add('active');
 }
 
-// ── Mock data ──
-const ARB_DATA = [
-  { match: "PSG – Marseille",    comp: "Ligue 1",     sport: "Football", books: "Betclic / Winamax",  odds: "2.10 / 2.05", mise: "€200", gain: "+€8.40",  trj: "104.2%", status: "live" },
-  { match: "Djokovic – Alcaraz", comp: "Roland-Garros",sport: "Tennis",  books: "Unibet / PMU",       odds: "1.90 / 2.20", mise: "€150", gain: "+€5.10",  trj: "103.4%", status: "live" },
-  { match: "Lyon – Nice",        comp: "Ligue 1",     sport: "Football", books: "Bwin / Betfair",     odds: "3.40 / 1.35", mise: "€100", gain: "+€3.20",  trj: "103.2%", status: "close" },
-  { match: "Barça – Real",       comp: "La Liga",     sport: "Football", books: "Winamax / Betclic",  odds: "2.55 / 1.65", mise: "€300", gain: "+€9.90",  trj: "103.3%", status: "live" },
-  { match: "Lakers – Celtics",   comp: "NBA",         sport: "Basket",   books: "Pinnacle / Unibet",  odds: "1.95 / 2.10", mise: "€250", gain: "+€6.25",  trj: "102.5%", status: "live" },
-  { match: "Federer – Medvedev", comp: "Wimbledon",   sport: "Tennis",   books: "PMU / Zebet",        odds: "1.75 / 2.40", mise: "€180", gain: "+€4.32",  trj: "102.4%", status: "close" },
-  { match: "Man City – Arsenal", comp: "Premier Lg",  sport: "Football", books: "Betclic / Bwin",     odds: "1.80 / 2.25", mise: "€120", gain: "+€2.88",  trj: "102.4%", status: "live"  },
-];
+// ── API URL config dialog ──
+function promptApiUrl() {
+  const url = prompt(
+    'Entrez l\'URL de votre API (ex: https://xxxxx.trycloudflare.com)\n\n' +
+    'Lancez d\'abord api/start.bat puis api/tunnel.bat sur votre PC.',
+    localStorage.getItem('sb_api_url') || ''
+  );
+  if (url) {
+    localStorage.setItem('sb_api_url', url.replace(/\/$/, ''));
+    location.reload();
+  }
+}
 
-const FB_DATA = [
-  { site: "Betclic",    amount: "€100", match: "PSG – Marseille",    hedge: "€68 sur Winamax", net: "+€73",  rate: "73%", exp: "15/06/2026" },
-  { site: "Winamax",   amount: "€50",  match: "Lyon – Monaco",      hedge: "€34 sur PMU",     net: "+€36",  rate: "72%", exp: "20/06/2026" },
-  { site: "PMU",       amount: "€200", match: "Barça – Real",       hedge: "€138 sur Bwin",   net: "+€146", rate: "73%", exp: "12/06/2026" },
-  { site: "Unibet",    amount: "€75",  match: "Lakers – Celtics",   hedge: "€51 sur Pinnacle",net: "+€54",  rate: "72%", exp: "18/06/2026" },
-  { site: "Bwin",      amount: "€150", match: "Man City – Chelsea", hedge: "€103 sur Betclic",net: "+€109", rate: "73%", exp: "25/06/2026" },
-];
+// ── Charts helpers ──
+function renderBars(elId, items, colorFn, valFn, labelFn) {
+  const el = document.getElementById(elId);
+  if (!el || !items.length) return;
+  const max = Math.max(...items.map(valFn));
+  el.innerHTML = items.map(b => {
+    const pct = Math.round(valFn(b) / max * 100);
+    return `<div class="bar-row">
+      <span class="bar-label">${labelFn(b)}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${colorFn(b)}"></div></div>
+      <span class="bar-val" style="color:${colorFn(b)}">${valFn(b)}</span>
+    </div>`;
+  }).join('');
+}
 
-const BOOKS = [
-  { name: "Betclic",   gain: 124, color: "#4f8ef7" },
-  { name: "Winamax",   gain: 98,  color: "#34d399" },
-  { name: "Unibet",    gain: 76,  color: "#a78bfa" },
-  { name: "PMU",       gain: 52,  color: "#f59e0b" },
-  { name: "Bwin",      gain: 44,  color: "#f87171" },
-  { name: "Pinnacle",  gain: 38,  color: "#38bdf8" },
-  { name: "Zebet",     gain: 22,  color: "#fb923c" },
-];
+const SPORT_COLORS = { football:'#4f8ef7', tennis:'#34d399', basketball:'#a78bfa', rugby:'#f59e0b', default:'#38bdf8' };
+function sportColor(s) { return SPORT_COLORS[s] || SPORT_COLORS.default; }
 
-const SUCCESS = [
-  { name: "Betclic",   pct: 92 },
-  { name: "Winamax",   pct: 88 },
-  { name: "Unibet",    pct: 85 },
-  { name: "PMU",       pct: 80 },
-  { name: "Bwin",      pct: 76 },
-  { name: "Pinnacle",  pct: 91 },
-];
-
-const SPORTS = [
-  { sport: "Football", count: 12, color: "#4f8ef7" },
-  { sport: "Tennis",   count: 7,  color: "#34d399" },
-  { sport: "Basket",   count: 4,  color: "#a78bfa" },
-  { sport: "Rugby",    count: 2,  color: "#f59e0b" },
-];
-
-// ── Render arbitrage table ──
-(function renderArb() {
-  const tbody = document.getElementById('arb-tbody');
-  ARB_DATA.forEach(r => {
-    const tr = document.createElement('tr');
-    const statusPill = r.status === 'live'
-      ? '<span class="pill green">Live</span>'
-      : '<span class="pill yellow">Proche</span>';
-    tr.innerHTML = `
-      <td><strong>${r.match}</strong></td>
-      <td>${r.comp}</td>
-      <td><span class="pill blue">${r.sport}</span></td>
-      <td style="color:var(--muted);font-size:0.8rem">${r.books}</td>
-      <td>${r.odds}</td>
-      <td>${r.mise}</td>
-      <td class="arb-gain">${r.gain}</td>
-      <td>${r.trj}</td>
-      <td>${statusPill}</td>`;
-    tbody.appendChild(tr);
-  });
-})();
-
-// ── Render freebet table ──
-(function renderFb() {
-  const tbody = document.getElementById('fb-tbody');
-  FB_DATA.forEach(r => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><strong>${r.site}</strong></td>
-      <td style="color:var(--warn)">${r.amount}</td>
-      <td>${r.match}</td>
-      <td style="color:var(--muted);font-size:0.8rem">${r.hedge}</td>
-      <td class="arb-gain">${r.net}</td>
-      <td>${r.rate}</td>
-      <td style="color:var(--muted)">${r.exp}</td>`;
-    tbody.appendChild(tr);
-  });
-})();
-
-// ── Bookmaker bars ──
-(function renderBars() {
-  const el = document.getElementById('bookmaker-bars');
-  const max = Math.max(...BOOKS.map(b => b.gain));
-  BOOKS.forEach(b => {
-    const pct = Math.round(b.gain / max * 100);
-    el.innerHTML += `
-      <div class="bar-row">
-        <span class="bar-label">${b.name}</span>
-        <div class="bar-track">
-          <div class="bar-fill" style="width:${pct}%;background:${b.color}"></div>
-        </div>
-        <span class="bar-val" style="color:${b.color}">+€${b.gain}</span>
-      </div>`;
-  });
-})();
-
-// ── Success rate bars ──
-(function renderSuccess() {
-  const el = document.getElementById('success-bars');
-  SUCCESS.forEach(b => {
-    el.innerHTML += `
-      <div class="bar-row">
-        <span class="bar-label">${b.name}</span>
-        <div class="bar-track">
-          <div class="bar-fill" style="width:${b.pct}%;background:var(--accent)"></div>
-        </div>
-        <span class="bar-val">${b.pct}%</span>
-      </div>`;
-  });
-})();
-
-// ── Donut chart (SVG) ──
-(function renderDonut() {
+function renderDonut(data) {
   const svg = document.getElementById('donut-svg');
   const legend = document.getElementById('donut-legend');
-  const total = SPORTS.reduce((s, d) => s + d.count, 0);
-  const cx = 60, cy = 60, r = 48, sw = 20;
-  let offset = 0;
-  const circ = 2 * Math.PI * r;
-  SPORTS.forEach(d => {
-    const dash = (d.count / total) * circ;
-    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    circle.setAttribute("cx", cx); circle.setAttribute("cy", cy); circle.setAttribute("r", r);
-    circle.setAttribute("fill", "none");
-    circle.setAttribute("stroke", d.color);
-    circle.setAttribute("stroke-width", sw);
-    circle.setAttribute("stroke-dasharray", `${dash} ${circ - dash}`);
-    circle.setAttribute("stroke-dashoffset", -offset);
-    circle.setAttribute("transform", `rotate(-90 ${cx} ${cy})`);
-    svg.appendChild(circle);
-    offset += dash;
-    legend.innerHTML += `<div class="legend-item">
+  if (!svg || !data.length) return;
+  const total = data.reduce((s, d) => s + d.count, 0);
+  const cx=60, cy=60, r=48, sw=20;
+  let offset=0;
+  const circ = 2*Math.PI*r;
+  svg.innerHTML=''; legend.innerHTML='';
+  data.forEach(d => {
+    const dash=(d.count/total)*circ;
+    const c=document.createElementNS("http://www.w3.org/2000/svg","circle");
+    c.setAttribute("cx",cx); c.setAttribute("cy",cy); c.setAttribute("r",r);
+    c.setAttribute("fill","none"); c.setAttribute("stroke",d.color);
+    c.setAttribute("stroke-width",sw);
+    c.setAttribute("stroke-dasharray",`${dash} ${circ-dash}`);
+    c.setAttribute("stroke-dashoffset",-offset);
+    c.setAttribute("transform",`rotate(-90 ${cx} ${cy})`);
+    svg.appendChild(c);
+    offset+=dash;
+    legend.innerHTML+=`<div class="legend-item">
       <div class="legend-dot" style="background:${d.color}"></div>
-      <span>${d.sport} <strong>${d.count}</strong></span>
-    </div>`;
+      <span>${d.sport} <strong>${d.count}</strong></span></div>`;
   });
-})();
+}
 
-// ── Line chart (SVG) ──
-(function renderLine() {
+function renderLine(vals) {
   const svg = document.getElementById('line-chart');
-  const vals = [0,4,8,5,12,18,14,22,28,25,32,38,35,42,48,44,52,58,55,62,68,72,69,78,82,86,90,88,95,100];
-  const W = 400, H = 160, pad = 16;
-  const min = 0, max = 100;
-  const pts = vals.map((v, i) => {
-    const x = pad + (i / (vals.length - 1)) * (W - 2 * pad);
-    const y = H - pad - ((v - min) / (max - min)) * (H - 2 * pad);
+  if (!svg) return;
+  const W=400, H=160, pad=16;
+  const min=Math.min(...vals), max=Math.max(...vals)||1;
+  const pts=vals.map((v,i)=>{
+    const x=pad+(i/(vals.length-1))*(W-2*pad);
+    const y=H-pad-((v-min)/(max-min))*(H-2*pad);
     return `${x},${y}`;
   });
-  const area = `M${pts[0]} L${pts.join(' L')} L${400-pad},${H-pad} L${pad},${H-pad} Z`;
-  const line = `M${pts[0]} L${pts.join(' L')}`;
-  svg.innerHTML = `
-    <defs>
-      <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#4f8ef7" stop-opacity="0.3"/>
-        <stop offset="100%" stop-color="#4f8ef7" stop-opacity="0"/>
-      </linearGradient>
-    </defs>
-    <path d="${area}" fill="url(#lg)"/>
-    <path d="${line}" fill="none" stroke="#4f8ef7" stroke-width="2.5" stroke-linejoin="round"/>`;
-})();
+  const area=`M${pts[0]} L${pts.join(' L')} L${W-pad},${H-pad} L${pad},${H-pad} Z`;
+  const line=`M${pts[0]} L${pts.join(' L')}`;
+  svg.innerHTML=`<defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#4f8ef7" stop-opacity="0.3"/>
+    <stop offset="100%" stop-color="#4f8ef7" stop-opacity="0"/>
+  </linearGradient></defs>
+  <path d="${area}" fill="url(#lg)"/>
+  <path d="${line}" fill="none" stroke="#4f8ef7" stroke-width="2.5" stroke-linejoin="round"/>`;
+}
+
+// ── Render avec données réelles ──
+function renderArbitrages(arbs) {
+  const tbody = document.getElementById('arb-tbody');
+  tbody.innerHTML = '';
+  if (!arbs.length) {
+    tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px">Aucun arbitrage détecté pour le moment</td></tr>';
+    return;
+  }
+  arbs.forEach(r => {
+    const tr=document.createElement('tr');
+    const gain100 = r.gain_100 > 0 ? `+€${r.gain_100} / €100 misés` : '-';
+    tr.innerHTML=`
+      <td><strong>${r.match}</strong></td>
+      <td>${r.competition}</td>
+      <td><span class="pill blue">${r.sport}</span></td>
+      <td style="color:var(--muted);font-size:0.8rem">${r.bookmakers}</td>
+      <td>${r.cotes}</td>
+      <td>${r.date}</td>
+      <td class="arb-gain">${gain100}</td>
+      <td>${r.trj}%</td>
+      <td><span class="pill green">Live</span></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderFreebets(fbs) {
+  const tbody = document.getElementById('fb-tbody');
+  tbody.innerHTML = '';
+  if (!fbs.length) {
+    tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px">Aucune donnée freebet disponible</td></tr>';
+    return;
+  }
+  fbs.forEach(r => {
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><strong>${r.site}</strong></td>
+      <td style="color:var(--accent)">${r.sport}</td>
+      <td>${r.match}</td>
+      <td>-</td>
+      <td class="arb-gain">~€${Math.round(r.taux)} / €100</td>
+      <td>${r.taux}%</td>
+      <td style="color:var(--muted)">-</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function updateKpis(kpis, lastUpdate) {
+  if (!kpis || !Object.keys(kpis).length) return;
+  document.getElementById('kpi-arb').textContent = kpis.nb_arbitrages ?? '-';
+  document.getElementById('kpi-trj').textContent = kpis.trj_moyen ? kpis.trj_moyen+'%' : '-';
+  document.getElementById('kpi-pv').textContent = kpis.gain_potentiel ? '+€'+kpis.gain_potentiel : '-';
+  document.getElementById('kpi-fb').textContent = kpis.nb_freebets ?? '-';
+  const d = lastUpdate ? new Date(lastUpdate) : null;
+  document.getElementById('footer-status').textContent =
+    'SportsBetting Dashboard · ' + (d ? 'Mis à jour à '+d.toLocaleTimeString('fr-FR') : 'En attente...');
+}
+
+// ── Fallback données démo si pas d'API ──
+function loadDemo() {
+  const arbs=[
+    {match:"PSG – Marseille",competition:"Ligue 1",sport:"football",bookmakers:"Betclic / Winamax",cotes:"2.10 / 2.05",trj:104.2,gain_100:4.2,date:""},
+    {match:"Djokovic – Alcaraz",competition:"Roland-Garros",sport:"tennis",bookmakers:"Unibet / PMU",cotes:"1.90 / 2.20",trj:103.4,gain_100:3.4,date:""},
+  ];
+  renderArbitrages(arbs);
+  const sportCounts={};
+  arbs.forEach(a=>{sportCounts[a.sport]=(sportCounts[a.sport]||0)+1;});
+  renderDonut(Object.entries(sportCounts).map(([s,c])=>({sport:s,count:c,color:sportColor(s)})));
+  renderLine([0,4,8,12,18,22,28,32,38,44,52,58,62,68,78,86,95,100]);
+  document.getElementById('footer-status').textContent =
+    'SportsBetting Dashboard · Mode démo — Configurez l\'API pour des données réelles';
+  document.querySelector('.badge').style.background='#3a1a0a';
+  document.querySelector('.badge').style.color='var(--warn)';
+  document.querySelector('.badge').textContent='● Démo';
+}
+
+// ── Fetch API ──
+async function fetchData() {
+  if (!API_URL) { loadDemo(); return; }
+  try {
+    const res = await fetch(API_URL + '/api/all', {signal: AbortSignal.timeout(10000)});
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    const data = await res.json();
+
+    updateKpis(data.kpis, data.last_update);
+    renderArbitrages(data.arbitrages || []);
+    renderFreebets(data.freebets || []);
+
+    // Graphique sports
+    const sportCounts={};
+    (data.arbitrages||[]).forEach(a=>{sportCounts[a.sport]=(sportCounts[a.sport]||0)+1;});
+    renderDonut(Object.entries(sportCounts).map(([s,c])=>({sport:s,count:c,color:sportColor(s)})));
+
+    // Barres bookmakers
+    const bookGains={};
+    (data.arbitrages||[]).forEach(a=>{
+      a.bookmakers.split(' / ').forEach(b=>{bookGains[b]=(bookGains[b]||0)+a.gain_100;});
+    });
+    const booksArr=Object.entries(bookGains).map(([n,g])=>({name:n,gain:Math.round(g)}))
+      .sort((a,b)=>b.gain-a.gain);
+    const bookColors=['#4f8ef7','#34d399','#a78bfa','#f59e0b','#f87171','#38bdf8','#fb923c'];
+    renderBars('bookmaker-bars', booksArr,
+      (_,i)=>bookColors[i%bookColors.length],
+      b=>b.gain > 0 ? '+€'+b.gain : '€0',
+      b=>b.name
+    );
+
+    renderLine([0,4,8,12,18,22,28,32,38,44,52,58,62,68,78,86,95,100]);
+
+    document.querySelector('.badge').textContent='● En ligne';
+    document.querySelector('.badge').style.color='var(--accent2)';
+
+  } catch(e) {
+    console.error('API error:', e);
+    document.getElementById('footer-status').textContent =
+      '⚠ API inaccessible — vérifiez que api/start.bat et api/tunnel.bat tournent sur votre PC';
+    document.querySelector('.badge').textContent='● Hors ligne';
+    document.querySelector('.badge').style.color='var(--danger)';
+    loadDemo();
+  }
+}
+
+// ── Bouton config API ──
+document.querySelector('.badge').style.cursor='pointer';
+document.querySelector('.badge').title='Cliquez pour configurer l\'URL de l\'API';
+document.querySelector('.badge').addEventListener('click', promptApiUrl);
+
+// ── Init ──
+fetchData();
+setInterval(fetchData, 60000); // Rafraîchit toutes les 60 secondes
 </script>
 </body>
 </html>
