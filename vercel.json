@@ -1,9 +1,8 @@
 {
-  "name": "sports-betting-dashboard",
+  "buildCommand": null,
   "outputDirectory": ".",
-  "builds": [
-    { "src": "index.html", "use": "@vercel/static" }
-  ],
+  "installCommand": null,
+  "framework": null,
   "routes": [
     { "src": "/(.*)", "dest": "/index.html" }
   ]
