@@ -106,7 +106,7 @@ def fetch_odds(sport_key):
     url = f"{ODDS_API_BASE}/sports/{sport_key}/odds/"
     params = {
         "apiKey": ODDS_API_KEY,
-        "regions": "eu",
+        "bookmakers": "betclic,winamax,unibet_fr,pmu_fr,bwin,pinnacle,betfair_ex_eu,gtbets,onexbet,tipico_de,coolbet,betonlineag,betsson,leovegas_se,everygame,marathonbet",
         "markets": "h2h",
         "oddsFormat": "decimal",
     }

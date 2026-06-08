@@ -180,6 +180,7 @@
       <div class="table-wrap">
         <table>
           <thead><tr><th>Match</th><th>Sport</th><th>Bookmakers</th><th>Cotes</th><th>Gain / €100</th><th>TRJ</th><th>Statut</th></tr></thead>
+
           <tbody id="arb-tbody"><tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">Connectez votre API pour voir les données réelles</td></tr></tbody>
         </table>
       </div>
@@ -194,7 +195,7 @@
     <div class="card"><div class="section-title">Taux de conversion freebet par bookmaker</div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Bookmaker</th><th>Sport</th><th>Meilleur match</th><th>Taux conv. estimé</th></tr></thead>
+          <thead><tr><th>Bookmaker</th><th>Sport</th><th>Meilleur match</th><th>Taux de conversion estimé</th></tr></thead>
           <tbody id="fb-tbody"><tr><td colspan="4" style="text-align:center;padding:40px;color:var(--muted)">Connectez votre API pour voir les données réelles</td></tr></tbody>
         </table>
       </div>
@@ -315,12 +316,12 @@ function renderArbitrages(arbs){
   if(!arbs.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">Aucun arbitrage détecté</td></tr>';return;}
   tb.innerHTML=arbs.map((r,i)=>`<tr class="clickable-row" onclick="openCalc(${i})" title="Cliquez pour calculer les mises exactes">
     <td><strong>${r.match}</strong><div style="font-size:.72rem;color:var(--accent);margin-top:2px">🧮 Calculer les mises</div></td>
-    <td><span class="pill blue">${r.sport}</span></td>
+    <td><span class="pill blue">${sportFr(r.sport)}</span></td>
     <td style="color:var(--muted);font-size:.8rem">${r.bookmakers}</td>
     <td>${r.cotes}</td>
     <td class="arb-gain">+€${r.gain_100}</td>
     <td>${r.trj}%</td>
-    <td><span class="pill green">Live</span></td>
+    <td><span class="pill green">En direct</span></td>
   </tr>`).join('');
 }
 
@@ -341,6 +342,14 @@ const BM_URLS = {
   marathonbet: 'marathonbet.com', parionssport: 'enligne.parionssport.fdj.fr',
 };
 
+// Traduction des noms de sports
+const SPORT_FR = {football:'Football',basketball:'Basketball',tennis:'Tennis',rugby:'Rugby'};
+function sportFr(s){return SPORT_FR[s]||s;}
+
+// Traduction des issues (résultats possibles)
+const OUTCOME_FR = {Draw:'Match nul',draw:'Match nul'};
+function outcomeFr(o){return OUTCOME_FR[o]||o;}
+
 // Marché selon le sport
 const MARKET_LABEL = {
   football: 'Résultat du match (1X2)', basketball: 'Vainqueur du match',
@@ -350,7 +359,7 @@ const MARKET_LABEL = {
 function openCalc(idx){
   _currentArb = _arbData[idx];
   document.getElementById('calc-match').textContent = _currentArb.match;
-  document.getElementById('calc-sport-badge').textContent = _currentArb.sport + ' · ' + (MARKET_LABEL[_currentArb.sport] || 'Résultat');
+  document.getElementById('calc-sport-badge').textContent = sportFr(_currentArb.sport) + ' · ' + (MARKET_LABEL[_currentArb.sport] || 'Résultat');
   document.getElementById('calc-trj-badge').textContent = 'TRJ ' + _currentArb.trj + '%';
   const d = _currentArb.date ? new Date(_currentArb.date) : null;
   document.getElementById('calc-date-badge').textContent = d ? '⏰ Match le ' + d.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
@@ -394,7 +403,7 @@ function updateCalc(){
         </div>
         <div class="step-field">
           <div class="sf-label">Pariez sur</div>
-          <div class="sf-value sf-outcome">${row.outcome}</div>
+          <div class="sf-value sf-outcome">${outcomeFr(row.outcome)}</div>
         </div>
         <div class="step-field">
           <div class="sf-label">Cote à vérifier</div>
@@ -407,7 +416,7 @@ function updateCalc(){
           <div class="sf-value sf-stake">€${stake.toFixed(2)}</div>
         </div>
         <div class="step-field" style="grid-column:2/4">
-          <div class="sf-label">Retour si "${row.outcome}" gagne</div>
+          <div class="sf-label">Retour si « ${outcomeFr(row.outcome)} » gagne</div>
           <div class="sf-value" style="color:var(--accent2)">€${ret.toFixed(2)} (mise + gain)</div>
         </div>
       </div>
@@ -430,7 +439,7 @@ function renderFreebets(fbs){
   if(!fbs.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:32px;color:var(--muted)">Aucune donnée</td></tr>';return;}
   tb.innerHTML=fbs.map(r=>`<tr>
     <td><strong>${r.site}</strong></td>
-    <td><span class="pill blue">${r.sport}</span></td>
+    <td><span class="pill blue">${sportFr(r.sport)}</span></td>
     <td style="color:var(--muted)">${r.match||'—'}</td>
     <td class="arb-gain">${r.taux}%</td>
   </tr>`).join('');
@@ -555,7 +564,7 @@ function filterHistory(){
     return `<tr>
       <td style="color:var(--muted);font-size:.8rem;white-space:nowrap">${dt}</td>
       <td><strong>${e.match}</strong></td>
-      <td><span class="pill blue">${e.sport}</span></td>
+      <td><span class="pill blue">${sportFr(e.sport)}</span></td>
       <td style="color:var(--muted);font-size:.8rem">${e.bookmakers}</td>
       <td style="font-size:.85rem">${e.cotes}</td>
       <td class="arb-gain">+€${e.gain_100}</td>
