@@ -284,6 +284,49 @@
 const SPORT_COLORS = {football:'#4f8ef7',tennis:'#34d399',basketball:'#a78bfa',rugby:'#f59e0b',default:'#38bdf8'};
 function sportColor(s){return SPORT_COLORS[s]||SPORT_COLORS.default;}
 
+// ── Traduction des noms d'équipes / pays ──
+const TEAMS_FR = {
+  // Coupe du Monde & Football international
+  'Ecuador':'Équateur','Tunisia':'Tunisie','Switzerland':'Suisse',
+  'Netherlands':'Pays-Bas','Saudi Arabia':'Arabie Saoudite','Norway':'Norvège',
+  'Japan':'Japon','England':'Angleterre','Germany':'Allemagne','Spain':'Espagne',
+  'Italy':'Italie','France':'France','Brazil':'Brésil','Argentina':'Argentine',
+  'Belgium':'Belgique','Croatia':'Croatie','Morocco':'Maroc','Senegal':'Sénégal',
+  'Portugal':'Portugal','Poland':'Pologne','Denmark':'Danemark','Sweden':'Suède',
+  'Mexico':'Mexique','United States':'États-Unis','South Africa':'Afrique du Sud',
+  'Ivory Coast':'Côte d\'Ivoire','Cameroon':'Cameroun','Nigeria':'Nigéria',
+  'Ghana':'Ghana','Australia':'Australie','New Zealand':'Nouvelle-Zélande',
+  'South Korea':'Corée du Sud','North Korea':'Corée du Nord','Iran':'Iran',
+  'Serbia':'Serbie','Ukraine':'Ukraine','Turkey':'Turquie','Greece':'Grèce',
+  'Hungary':'Hongrie','Czech Republic':'Rép. Tchèque','Slovakia':'Slovaquie',
+  'Romania':'Roumanie','Scotland':'Écosse','Wales':'Pays de Galles',
+  'Ireland':'Irlande','Austria':'Autriche','Algeria':'Algérie','Egypt':'Égypte',
+  'Colombia':'Colombie','Chile':'Chili','Paraguay':'Paraguay','Peru':'Pérou',
+  'Bolivia':'Bolivie','Venezuela':'Venezuela','Costa Rica':'Costa Rica',
+  'Panama':'Panama','Honduras':'Honduras','Guatemala':'Guatemala',
+  'Jamaica':'Jamaïque','Haiti':'Haïti','Trinidad and Tobago':'Trinidad et Tobago',
+  'Uzbekistan':'Ouzbékistan','Jordan':'Jordanie','Iraq':'Irak','Syria':'Syrie',
+  'Lebanon':'Liban','Palestine':'Palestine','Bahrain':'Bahreïn','Kuwait':'Koweït',
+  'Oman':'Oman','Yemen':'Yémen','UAE':'Émirats Arabes Unis',
+  'Qatar':'Qatar','Canada':'Canada','Curaçao':'Curaçao','Cuba':'Cuba',
+  'Russia':'Russie','Belarus':'Biélorussie','Georgia':'Géorgie',
+  'Armenia':'Arménie','Azerbaijan':'Azerbaïdjan','Kazakhstan':'Kazakhstan',
+  'Albania':'Albanie','Kosovo':'Kosovo','North Macedonia':'Macédoine du Nord',
+  'Bosnia and Herzegovina':'Bosnie-Herzégovine','Montenegro':'Monténégro',
+  'Slovenia':'Slovénie','Bulgaria':'Bulgarie','Estonia':'Estonie',
+  'Latvia':'Lettonie','Lithuania':'Lituanie','Finland':'Finlande',
+  'Iceland':'Islande','Luxembourg':'Luxembourg','Malta':'Malte',
+  'Cyprus':'Chypre','Israel':'Israël','Liechtenstein':'Liechtenstein',
+  'Andorra':'Andorre','San Marino':'Saint-Marin','Faroe Islands':'Îles Féroé',
+  // Basketball
+  'Golden State Warriors':'Golden State Warriors','Boston Celtics':'Boston Celtics',
+  'LA Lakers':'LA Lakers','Miami Heat':'Miami Heat','Chicago Bulls':'Chicago Bulls',
+  // Tennis (noms propres — inchangés)
+  // Résultats
+  'Draw':'Match nul',
+};
+function tr(name){return TEAMS_FR[name]||name;}
+
 function switchTab(id){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
@@ -315,7 +358,7 @@ function renderArbitrages(arbs){
   const tb=document.getElementById('arb-tbody');
   if(!arbs.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">Aucun arbitrage détecté</td></tr>';return;}
   tb.innerHTML=arbs.map((r,i)=>`<tr class="clickable-row" onclick="openCalc(${i})" title="Cliquez pour calculer les mises exactes">
-    <td><strong>${r.match}</strong><div style="font-size:.72rem;color:var(--accent);margin-top:2px">🧮 Calculer les mises</div></td>
+    <td><strong>${r.match.split(' vs ').map(tr).join(' vs ')}</strong><div style="font-size:.72rem;color:var(--accent);margin-top:2px">🧮 Calculer les mises</div></td>
     <td><span class="pill blue">${sportFr(r.sport)}</span></td>
     <td style="color:var(--muted);font-size:.8rem">${r.bookmakers}</td>
     <td>${r.cotes}</td>
@@ -358,7 +401,7 @@ const MARKET_LABEL = {
 
 function openCalc(idx){
   _currentArb = _arbData[idx];
-  document.getElementById('calc-match').textContent = _currentArb.match;
+  document.getElementById('calc-match').textContent = _currentArb.match.split(' vs ').map(tr).join(' vs ');
   document.getElementById('calc-sport-badge').textContent = sportFr(_currentArb.sport) + ' · ' + (MARKET_LABEL[_currentArb.sport] || 'Résultat');
   document.getElementById('calc-trj-badge').textContent = 'TRJ ' + _currentArb.trj + '%';
   const d = _currentArb.date ? new Date(_currentArb.date) : null;
@@ -403,7 +446,7 @@ function updateCalc(){
         </div>
         <div class="step-field">
           <div class="sf-label">Pariez sur</div>
-          <div class="sf-value sf-outcome">${outcomeFr(row.outcome)}</div>
+          <div class="sf-value sf-outcome">${tr(outcomeFr(row.outcome))}</div>
         </div>
         <div class="step-field">
           <div class="sf-label">Cote à vérifier</div>
@@ -416,7 +459,7 @@ function updateCalc(){
           <div class="sf-value sf-stake">€${stake.toFixed(2)}</div>
         </div>
         <div class="step-field" style="grid-column:2/4">
-          <div class="sf-label">Retour si « ${outcomeFr(row.outcome)} » gagne</div>
+          <div class="sf-label">Retour si « ${tr(outcomeFr(row.outcome))} » gagne</div>
           <div class="sf-value" style="color:var(--accent2)">€${ret.toFixed(2)} (mise + gain)</div>
         </div>
       </div>
@@ -563,7 +606,7 @@ function filterHistory(){
     const dt=e.detected_at?new Date(e.detected_at).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
     return `<tr>
       <td style="color:var(--muted);font-size:.8rem;white-space:nowrap">${dt}</td>
-      <td><strong>${e.match}</strong></td>
+      <td><strong>${e.match.split(' vs ').map(tr).join(' vs ')}</strong></td>
       <td><span class="pill blue">${sportFr(e.sport)}</span></td>
       <td style="color:var(--muted);font-size:.8rem">${e.bookmakers}</td>
       <td style="font-size:.85rem">${e.cotes}</td>
