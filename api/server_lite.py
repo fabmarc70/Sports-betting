@@ -20,13 +20,32 @@ ODDS_API_KEY = os.environ.get("ODDS_API_KEY", "2dd8f5e82d2c99c2950e7c9aae554d22"
 
 ODDS_API_BASE = "https://api.the-odds-api.com/v4"
 
-# Groupes de sports — le premier disponible dans chaque groupe est utilisé
+# Groupes de sports — TOUS les sports du groupe sont scannés (pas juste le premier)
 SPORT_GROUPS = {
-    "football":   ["soccer_france_ligue1", "soccer_epl", "soccer_uefa_champs_league",
-                   "soccer_spain_la_liga", "soccer_germany_bundesliga", "soccer_italy_serie_a"],
-    "basketball": ["basketball_euroleague", "basketball_nba", "basketball_ncaab"],
-    "tennis":     ["tennis_atp_french_open", "tennis_atp_wimbledon", "tennis_atp_us_open",
-                   "tennis_wta_us_open"],
+    "football":   [
+        "soccer_fifa_world_cup",         # Coupe du Monde 2026
+        "soccer_uefa_nations_league_a",  # UEFA Nations League
+        "soccer_uefa_nations_league",
+        "soccer_conmebol_copa_america",
+        "soccer_france_ligue1",
+        "soccer_epl",
+        "soccer_uefa_champs_league",
+        "soccer_spain_la_liga",
+        "soccer_germany_bundesliga",
+        "soccer_italy_serie_a",
+    ],
+    "basketball": [
+        "basketball_nba",
+        "basketball_euroleague",
+        "basketball_ncaab",
+    ],
+    "tennis":     [
+        "tennis_atp_wimbledon",
+        "tennis_wta_wimbledon",
+        "tennis_atp_us_open",
+        "tennis_wta_us_open",
+        "tennis_atp_french_open",
+    ],
 }
 
 BOOKMAKERS_FR = [
@@ -186,22 +205,20 @@ def refresh_loop():
                 if stop:
                     break
                 for sport_key in sport_keys:
-                    print(f"  Scan {sport_name} ({sport_key})...")
+                    print(f"  Scan {sport_key}...")
                     events, rem = fetch_odds(sport_key)
                     if events is None:
                         if rem == "invalid_key":
                             with LOCK:
                                 CACHE["status"] = "invalid_key"
                             stop = True
-                        break
+                            break
+                        continue
                     remaining = rem
                     matches = parse_matches(events, sport_name)
                     if matches:
                         all_matches.extend(matches)
                         print(f"    → {len(matches)} matchs")
-                        break  # Sport trouvé, passe au groupe suivant
-                    else:
-                        print(f"    → 0 matchs, essai suivant...")
                     time.sleep(1)  # Respecte le rate limit
 
             arbs = find_arbitrages(all_matches)
