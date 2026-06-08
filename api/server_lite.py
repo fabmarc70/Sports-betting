@@ -16,7 +16,7 @@ CORS(app)
 # CONFIGURATION — mettez votre clé API ici
 # Inscription gratuite : https://the-odds-api.com
 # ─────────────────────────────────────────────
-ODDS_API_KEY = os.environ.get("ODDS_API_KEY", "")
+ODDS_API_KEY = os.environ.get("ODDS_API_KEY", "2dd8f5e82d2c99c2950e7c9aae554d22")
 
 ODDS_API_BASE = "https://api.the-odds-api.com/v4"
 
