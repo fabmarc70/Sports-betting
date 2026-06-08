@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SportsBetting Dashboard</title>
+  <meta name="description" content="Tableau de bord arbitrage et freebets" />
+  <meta name="theme-color" content="#0f1117" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="SBDashboard" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <!-- Inline SVG icon as data URI for apple-touch-icon fallback -->
+  <style>
+    /* PWA splash */
+    @media (display-mode: standalone) { body { padding-top: env(safe-area-inset-top); } }
+  </style>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #242838;
+      --accent: #4f8ef7;
+      --accent2: #34d399;
+      --warn: #f59e0b;
+      --danger: #ef4444;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --border: #2d3748;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    header .logo { font-size: 1.5rem; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; }
+    header .subtitle { color: var(--muted); font-size: 0.85rem; }
+    header .badge {
+      margin-left: auto;
+      background: #1a3a2a;
+      color: var(--accent2);
+      border: 1px solid var(--accent2);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    /* ── Layout ── */
+    main { max-width: 1400px; margin: 0 auto; padding: 32px; }
+
+    /* ── KPI Cards ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .kpi {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .kpi .label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+    .kpi .value { font-size: 1.8rem; font-weight: 700; }
+    .kpi .delta { font-size: 0.8rem; margin-top: 4px; }
+    .kpi.green .value { color: var(--accent2); }
+    .kpi.blue .value { color: var(--accent); }
+    .kpi.yellow .value { color: var(--warn); }
+    .kpi.red .value { color: var(--danger); }
+    .up { color: var(--accent2); }
+    .down { color: var(--danger); }
+
+    /* ── Section titles ── */
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── Two-column layout ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+    @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    thead th {
+      text-align: left;
+      padding: 10px 12px;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr:hover { background: var(--surface2); }
+    tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+    .pill.green { background: #1a3a2a; color: var(--accent2); }
+    .pill.yellow { background: #3a2a0a; color: var(--warn); }
+    .pill.blue { background: #0a1a3a; color: var(--accent); }
+
+    /* ── Bar chart (pure CSS) ── */
+    .bar-chart { display: flex; flex-direction: column; gap: 10px; }
+    .bar-row { display: flex; align-items: center; gap: 12px; font-size: 0.82rem; }
+    .bar-row .bar-label { min-width: 90px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar-track { flex: 1; background: var(--surface2); border-radius: 4px; height: 16px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
+    .bar-row .bar-val { min-width: 48px; text-align: right; font-weight: 600; font-size: 0.8rem; }
+
+    /* ── Arbitrage table ── */
+    .arb-gain { color: var(--accent2); font-weight: 700; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      border-top: 1px solid var(--border);
+      margin-top: 16px;
+    }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: 4px; margin-bottom: 20px; }
+    .tab {
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--muted);
+      border: 1px solid transparent;
+      transition: all 0.15s;
+    }
+    .tab:hover { color: var(--text); background: var(--surface2); }
+    .tab.active { color: var(--accent); border-color: var(--accent); background: #0a1a3a; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Donut (SVG) ── */
+    .donut-wrap { display: flex; align-items: center; gap: 24px; }
+    .legend { display: flex; flex-direction: column; gap: 8px; }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">⚽ SportsBetting</div>
+    <div class="subtitle">Tableau de bord – Arbitrage &amp; Freebets</div>
+  </div>
+  <div class="badge">● En ligne</div>
+</header>
+
+<main>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi green">
+      <div class="label">Plus-value totale</div>
+      <div class="value" id="kpi-pv">+€342</div>
+      <div class="delta up" id="kpi-pv-d">↑ +12% ce mois</div>
+    </div>
+    <div class="kpi blue">
+      <div class="label">Freebets convertis</div>
+      <div class="value" id="kpi-fb">18</div>
+      <div class="delta up">↑ 3 cette semaine</div>
+    </div>
+    <div class="kpi yellow">
+      <div class="label">Mises en cours</div>
+      <div class="value" id="kpi-mise">€1 240</div>
+      <div class="delta" style="color:var(--muted)">sur 6 bookmakers</div>
+    </div>
+    <div class="kpi blue">
+      <div class="label">Arbitrages trouvés</div>
+      <div class="value" id="kpi-arb">7</div>
+      <div class="delta up">↑ 2 nouveaux</div>
+    </div>
+    <div class="kpi green">
+      <div class="label">TRJ moyen</div>
+      <div class="value" id="kpi-trj">96.4%</div>
+      <div class="delta" style="color:var(--muted)">sur les 30 derniers jours</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('arb')">Arbitrages</div>
+    <div class="tab" onclick="switchTab('freebets')">Freebets</div>
+    <div class="tab" onclick="switchTab('stats')">Statistiques</div>
+  </div>
+
+  <!-- Tab: Arbitrages -->
+  <div class="tab-panel active" id="tab-arb">
+    <div class="card" style="margin-bottom:24px;">
+      <div class="section-title">Meilleures opportunités d'arbitrage</div>
+      <div class="table-wrap">
+        <table id="arb-table">
+          <thead>
+            <tr>
+              <th>Match</th>
+              <th>Compétition</th>
+              <th>Sport</th>
+              <th>Bookmakers</th>
+              <th>Cotes</th>
+              <th>Mise</th>
+              <th>Gain garanti</th>
+              <th>TRJ</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody id="arb-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="section-title">Gain par bookmaker</div>
+        <div class="bar-chart" id="bookmaker-bars"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Répartition par sport</div>
+        <div class="donut-wrap">
+          <svg width="120" height="120" viewBox="0 0 120 120" id="donut-svg"></svg>
+          <div class="legend" id="donut-legend"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Freebets -->
+  <div class="tab-panel" id="tab-freebets">
+    <div class="card" style="margin-bottom:24px;">
+      <div class="section-title">Conversion de freebets actifs</div>
+      <div class="table-wrap">
+        <table id="fb-table">
+          <thead>
+            <tr>
+              <th>Site</th>
+              <th>Montant freebet</th>
+              <th>Match cible</th>
+              <th>Mise hedge</th>
+              <th>Retour net estimé</th>
+              <th>Taux conv.</th>
+              <th>Expire le</th>
+            </tr>
+          </thead>
+          <tbody id="fb-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Stats -->
+  <div class="tab-panel" id="tab-stats">
+    <div class="two-col">
+      <div class="card">
+        <div class="section-title">Évolution de la plus-value (30 jours)</div>
+        <svg id="line-chart" width="100%" height="180" viewBox="0 0 400 180" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="card">
+        <div class="section-title">Taux de succès par bookmaker</div>
+        <div class="bar-chart" id="success-bars"></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>Sports-betting dashboard — données simulées pour illustration · Aucune donnée réelle transmise</footer>
+
+<script>
+// ── Tab navigation ──
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  const idx = ['arb','freebets','stats'].indexOf(id);
+  document.querySelectorAll('.tab')[idx].classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+// ── Mock data ──
+const ARB_DATA = [
+  { match: "PSG – Marseille",    comp: "Ligue 1",     sport: "Football", books: "Betclic / Winamax",  odds: "2.10 / 2.05", mise: "€200", gain: "+€8.40",  trj: "104.2%", status: "live" },
+  { match: "Djokovic – Alcaraz", comp: "Roland-Garros",sport: "Tennis",  books: "Unibet / PMU",       odds: "1.90 / 2.20", mise: "€150", gain: "+€5.10",  trj: "103.4%", status: "live" },
+  { match: "Lyon – Nice",        comp: "Ligue 1",     sport: "Football", books: "Bwin / Betfair",     odds: "3.40 / 1.35", mise: "€100", gain: "+€3.20",  trj: "103.2%", status: "close" },
+  { match: "Barça – Real",       comp: "La Liga",     sport: "Football", books: "Winamax / Betclic",  odds: "2.55 / 1.65", mise: "€300", gain: "+€9.90",  trj: "103.3%", status: "live" },
+  { match: "Lakers – Celtics",   comp: "NBA",         sport: "Basket",   books: "Pinnacle / Unibet",  odds: "1.95 / 2.10", mise: "€250", gain: "+€6.25",  trj: "102.5%", status: "live" },
+  { match: "Federer – Medvedev", comp: "Wimbledon",   sport: "Tennis",   books: "PMU / Zebet",        odds: "1.75 / 2.40", mise: "€180", gain: "+€4.32",  trj: "102.4%", status: "close" },
+  { match: "Man City – Arsenal", comp: "Premier Lg",  sport: "Football", books: "Betclic / Bwin",     odds: "1.80 / 2.25", mise: "€120", gain: "+€2.88",  trj: "102.4%", status: "live"  },
+];
+
+const FB_DATA = [
+  { site: "Betclic",    amount: "€100", match: "PSG – Marseille",    hedge: "€68 sur Winamax", net: "+€73",  rate: "73%", exp: "15/06/2026" },
+  { site: "Winamax",   amount: "€50",  match: "Lyon – Monaco",      hedge: "€34 sur PMU",     net: "+€36",  rate: "72%", exp: "20/06/2026" },
+  { site: "PMU",       amount: "€200", match: "Barça – Real",       hedge: "€138 sur Bwin",   net: "+€146", rate: "73%", exp: "12/06/2026" },
+  { site: "Unibet",    amount: "€75",  match: "Lakers – Celtics",   hedge: "€51 sur Pinnacle",net: "+€54",  rate: "72%", exp: "18/06/2026" },
+  { site: "Bwin",      amount: "€150", match: "Man City – Chelsea", hedge: "€103 sur Betclic",net: "+€109", rate: "73%", exp: "25/06/2026" },
+];
+
+const BOOKS = [
+  { name: "Betclic",   gain: 124, color: "#4f8ef7" },
+  { name: "Winamax",   gain: 98,  color: "#34d399" },
+  { name: "Unibet",    gain: 76,  color: "#a78bfa" },
+  { name: "PMU",       gain: 52,  color: "#f59e0b" },
+  { name: "Bwin",      gain: 44,  color: "#f87171" },
+  { name: "Pinnacle",  gain: 38,  color: "#38bdf8" },
+  { name: "Zebet",     gain: 22,  color: "#fb923c" },
+];
+
+const SUCCESS = [
+  { name: "Betclic",   pct: 92 },
+  { name: "Winamax",   pct: 88 },
+  { name: "Unibet",    pct: 85 },
+  { name: "PMU",       pct: 80 },
+  { name: "Bwin",      pct: 76 },
+  { name: "Pinnacle",  pct: 91 },
+];
+
+const SPORTS = [
+  { sport: "Football", count: 12, color: "#4f8ef7" },
+  { sport: "Tennis",   count: 7,  color: "#34d399" },
+  { sport: "Basket",   count: 4,  color: "#a78bfa" },
+  { sport: "Rugby",    count: 2,  color: "#f59e0b" },
+];
+
+// ── Render arbitrage table ──
+(function renderArb() {
+  const tbody = document.getElementById('arb-tbody');
+  ARB_DATA.forEach(r => {
+    const tr = document.createElement('tr');
+    const statusPill = r.status === 'live'
+      ? '<span class="pill green">Live</span>'
+      : '<span class="pill yellow">Proche</span>';
+    tr.innerHTML = `
+      <td><strong>${r.match}</strong></td>
+      <td>${r.comp}</td>
+      <td><span class="pill blue">${r.sport}</span></td>
+      <td style="color:var(--muted);font-size:0.8rem">${r.books}</td>
+      <td>${r.odds}</td>
+      <td>${r.mise}</td>
+      <td class="arb-gain">${r.gain}</td>
+      <td>${r.trj}</td>
+      <td>${statusPill}</td>`;
+    tbody.appendChild(tr);
+  });
+})();
+
+// ── Render freebet table ──
+(function renderFb() {
+  const tbody = document.getElementById('fb-tbody');
+  FB_DATA.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${r.site}</strong></td>
+      <td style="color:var(--warn)">${r.amount}</td>
+      <td>${r.match}</td>
+      <td style="color:var(--muted);font-size:0.8rem">${r.hedge}</td>
+      <td class="arb-gain">${r.net}</td>
+      <td>${r.rate}</td>
+      <td style="color:var(--muted)">${r.exp}</td>`;
+    tbody.appendChild(tr);
+  });
+})();
+
+// ── Bookmaker bars ──
+(function renderBars() {
+  const el = document.getElementById('bookmaker-bars');
+  const max = Math.max(...BOOKS.map(b => b.gain));
+  BOOKS.forEach(b => {
+    const pct = Math.round(b.gain / max * 100);
+    el.innerHTML += `
+      <div class="bar-row">
+        <span class="bar-label">${b.name}</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${pct}%;background:${b.color}"></div>
+        </div>
+        <span class="bar-val" style="color:${b.color}">+€${b.gain}</span>
+      </div>`;
+  });
+})();
+
+// ── Success rate bars ──
+(function renderSuccess() {
+  const el = document.getElementById('success-bars');
+  SUCCESS.forEach(b => {
+    el.innerHTML += `
+      <div class="bar-row">
+        <span class="bar-label">${b.name}</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${b.pct}%;background:var(--accent)"></div>
+        </div>
+        <span class="bar-val">${b.pct}%</span>
+      </div>`;
+  });
+})();
+
+// ── Donut chart (SVG) ──
+(function renderDonut() {
+  const svg = document.getElementById('donut-svg');
+  const legend = document.getElementById('donut-legend');
+  const total = SPORTS.reduce((s, d) => s + d.count, 0);
+  const cx = 60, cy = 60, r = 48, sw = 20;
+  let offset = 0;
+  const circ = 2 * Math.PI * r;
+  SPORTS.forEach(d => {
+    const dash = (d.count / total) * circ;
+    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    circle.setAttribute("cx", cx); circle.setAttribute("cy", cy); circle.setAttribute("r", r);
+    circle.setAttribute("fill", "none");
+    circle.setAttribute("stroke", d.color);
+    circle.setAttribute("stroke-width", sw);
+    circle.setAttribute("stroke-dasharray", `${dash} ${circ - dash}`);
+    circle.setAttribute("stroke-dashoffset", -offset);
+    circle.setAttribute("transform", `rotate(-90 ${cx} ${cy})`);
+    svg.appendChild(circle);
+    offset += dash;
+    legend.innerHTML += `<div class="legend-item">
+      <div class="legend-dot" style="background:${d.color}"></div>
+      <span>${d.sport} <strong>${d.count}</strong></span>
+    </div>`;
+  });
+})();
+
+// ── Line chart (SVG) ──
+(function renderLine() {
+  const svg = document.getElementById('line-chart');
+  const vals = [0,4,8,5,12,18,14,22,28,25,32,38,35,42,48,44,52,58,55,62,68,72,69,78,82,86,90,88,95,100];
+  const W = 400, H = 160, pad = 16;
+  const min = 0, max = 100;
+  const pts = vals.map((v, i) => {
+    const x = pad + (i / (vals.length - 1)) * (W - 2 * pad);
+    const y = H - pad - ((v - min) / (max - min)) * (H - 2 * pad);
+    return `${x},${y}`;
+  });
+  const area = `M${pts[0]} L${pts.join(' L')} L${400-pad},${H-pad} L${pad},${H-pad} Z`;
+  const line = `M${pts[0]} L${pts.join(' L')}`;
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#4f8ef7" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="#4f8ef7" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <path d="${area}" fill="url(#lg)"/>
+    <path d="${line}" fill="none" stroke="#4f8ef7" stroke-width="2.5" stroke-linejoin="round"/>`;
+})();
+</script>
+</body>
+</html>
