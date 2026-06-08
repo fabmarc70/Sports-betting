@@ -987,15 +987,15 @@ def add_close_player_to_db(player, site):
     c = conn.cursor()
     c.execute("""
     UPDATE players
-    SET name_{} = "{}"
+    SET name_{} = ?
     WHERE _rowid_ = (
         SELECT _rowid_
         FROM players
-        WHERE name = "{}"
+        WHERE name = ?
         ORDER BY _rowid_
         LIMIT 1
     )
-    """.format(site, player, player_ref))
+    """.format(site), (player, player_ref))
     c.close()
     conn.commit()
     return player_ref
@@ -1005,8 +1005,8 @@ def add_new_player_to_db(player):
     c = conn.cursor()
     c.execute("""
     INSERT INTO players (name)
-    VALUES ("{}")
-    """.format(player))
+    VALUES (?)
+    """, (player,))
     conn.commit()
     c.close()
     
