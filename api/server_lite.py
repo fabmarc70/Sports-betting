@@ -198,6 +198,17 @@ def find_arbitrages(matches):
             gain_100 = round((1 / trj_inv - 1) * 100, 2)
             bookmakers_str = " / ".join(set(v[0] for v in best_per_outcome.values()))
             cotes_str = " / ".join(f"{v[1]}" for v in best_per_outcome.values())
+            # Détail par issue pour le calculateur de mise
+            breakdown = []
+            for team, (bm, odd) in best_per_outcome.items():
+                # Mise optimale : total * (1/odd) / trj_inv
+                stake_pct = round((1 / odd) / trj_inv * 100, 2)
+                breakdown.append({
+                    "outcome": team,
+                    "bookmaker": bm,
+                    "odd": odd,
+                    "stake_pct": stake_pct,   # % de la mise totale à placer ici
+                })
             results.append({
                 "match": m["match"],
                 "sport": m["sport"],
@@ -207,7 +218,8 @@ def find_arbitrages(matches):
                 "trj": trj,
                 "gain_100": gain_100,
                 "date": m.get("date", ""),
-                "status": "live"
+                "status": "live",
+                "breakdown": breakdown,
             })
 
     results.sort(key=lambda x: x["trj"], reverse=True)
