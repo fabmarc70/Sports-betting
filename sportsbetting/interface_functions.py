@@ -6,6 +6,7 @@
 :synopsis: Fonctions d'intéraction entre l'interface et les fonctions du package sportsbetting
 """
 
+import ast
 import datetime # à garder jusqu'à JSON
 import sys
 import io
@@ -42,7 +43,7 @@ def odds_table(result):
     for i, line in enumerate(lines):
         if "}}" in line:
             break
-    dict_odds = eval("".join(lines[1:i + 1]))
+    dict_odds = ast.literal_eval("".join(lines[1:i + 1]))
     odds = dict_odds["odds"]
     if len(list(odds.values())[0]) == 2:
         for key in odds.keys():
@@ -89,7 +90,7 @@ def infos(result):
     for i, line in enumerate(lines):
         if "}}" in line:
             break
-    dict_odds = eval("".join(lines[1:i + 1]))
+    dict_odds = ast.literal_eval("".join(lines[1:i + 1]))
     date = dict_odds["date"]
     return match, date.strftime("%A %d %B %Y %H:%M")
 
@@ -105,7 +106,7 @@ def odds_table_combine(result):
     for i, line in enumerate(lines):
         if "}}" in line:
             break
-    dict_odds = eval("".join(lines[1:i + 1]))
+    dict_odds = ast.literal_eval("".join(lines[1:i + 1]))
     odds = dict_odds["odds"]
     table = []
     combinaisons = []
@@ -637,7 +638,7 @@ def compute_odds(window, values):
         sys.stdout = old_stdout  # Put the old stream back in place
         what_was_printed = buffer.getvalue()
         profit = float(what_was_printed.split("\n")[4].split(' = ')[1])
-        stakes = eval(what_was_printed.split("\n")[5].split(' = ')[1])
+        stakes = ast.literal_eval(what_was_printed.split("\n")[5].split(' = ')[1])
     elif values["OUTCOME_ODDS_MAX"]:
         old_stdout = sys.stdout  # Memorize the default stdout stream
         sys.stdout = buffer = io.StringIO()
@@ -645,7 +646,7 @@ def compute_odds(window, values):
         sys.stdout = old_stdout  # Put the old stream back in place
         what_was_printed = buffer.getvalue()
         profit = float(what_was_printed.split("\n")[5].split(' = ')[1])
-        stakes = eval(what_was_printed.split("\n")[6].split(' = ')[1])
+        stakes = ast.literal_eval(what_was_printed.split("\n")[6].split(' = ')[1])
     else:
         outcomes = ["1", "2"]
         if get_nb_outcomes(sport) == 3:
@@ -661,7 +662,7 @@ def compute_odds(window, values):
         sys.stdout = old_stdout  # Put the old stream back in place
         what_was_printed = buffer.getvalue()
         profit = float(what_was_printed.split("\n")[5].split(' = ')[1])
-        stakes = eval(what_was_printed.split("\n")[6].split(' = ')[1])
+        stakes = ast.literal_eval(what_was_printed.split("\n")[6].split(' = ')[1])
     teams = match.split(" - ")
     if get_nb_outcomes(sport) == 3:
         teams.insert(1, "Nul")
