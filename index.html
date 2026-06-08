@@ -125,6 +125,7 @@
     <div class="tab active" onclick="switchTab('arb')">Arbitrages</div>
     <div class="tab" onclick="switchTab('freebets')">Freebets</div>
     <div class="tab" onclick="switchTab('stats')">Statistiques</div>
+    <div class="tab" onclick="switchTab('history')">Historique</div>
   </div>
 
   <div class="tab-panel active" id="tab-arb">
@@ -160,6 +161,33 @@
       <div class="card"><div class="section-title">TRJ par bookmaker</div><div class="bar-chart" id="success-bars"><div style="color:var(--muted);font-size:.85rem">En attente de l'API…</div></div></div>
     </div>
   </div>
+
+  <div class="tab-panel" id="tab-history">
+    <div class="kpi-grid" style="margin-bottom:20px;">
+      <div class="kpi green"><div class="label">Total arbitrages enregistrés</div><div class="value" id="h-total">—</div><div class="delta">depuis le démarrage</div></div>
+      <div class="kpi green"><div class="label">Gain cumulé simulé / €100</div><div class="value" id="h-gain">—</div><div class="delta">si €100 misés sur chaque</div></div>
+      <div class="kpi blue"><div class="label">TRJ moyen historique</div><div class="value" id="h-trj">—</div><div class="delta">sur toutes les opportunités</div></div>
+      <div class="kpi yellow"><div class="label">Meilleur arbitrage</div><div class="value" id="h-best">—</div><div class="delta">gain max détecté</div></div>
+    </div>
+    <div class="card">
+      <div class="section-title">Journal des opportunités détectées</div>
+      <div style="margin-bottom:12px;display:flex;gap:10px;flex-wrap:wrap;">
+        <input id="h-search" type="text" placeholder="Rechercher un match…" oninput="filterHistory()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:8px;font-size:.85rem;width:240px;outline:none;">
+        <select id="h-sport" onchange="filterHistory()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:8px;font-size:.85rem;outline:none;">
+          <option value="">Tous les sports</option>
+          <option value="football">Football</option>
+          <option value="basketball">Basketball</option>
+          <option value="tennis">Tennis</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Date détectée</th><th>Match</th><th>Sport</th><th>Bookmakers</th><th>Cotes</th><th>Gain / €100</th><th>TRJ</th></tr></thead>
+          <tbody id="history-tbody"><tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">L'historique se construira au fil des refreshs (toutes les 5 min)</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </main>
 
 <footer id="footer-status">SportsBetting Dashboard · En attente de connexion API</footer>
@@ -172,9 +200,10 @@ function sportColor(s){return SPORT_COLORS[s]||SPORT_COLORS.default;}
 function switchTab(id){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  const idx=['arb','freebets','stats'].indexOf(id);
+  const idx=['arb','freebets','stats','history'].indexOf(id);
   document.querySelectorAll('.tab')[idx].classList.add('active');
   document.getElementById('tab-'+id).classList.add('active');
+  if(id==='history') fetchHistory();
 }
 
 // Charge l'URL sauvegardée
@@ -295,6 +324,54 @@ async function fetchData(){
     pill.className='status-pill offline';pill.textContent='● Hors ligne';
     footer.textContent='⚠ API inaccessible ('+e.message+') — vérifiez que server_lite.py et tunnel.bat tournent sur votre PC';
   }
+}
+
+// ── Historique ──
+let _historyData = [];
+
+async function fetchHistory(){
+  const url=(localStorage.getItem('sb_api_url')||'').trim();
+  if(!url) return;
+  try{
+    const res=await fetch(url+'/api/history',{signal:AbortSignal.timeout(10000)});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const d=await res.json();
+    _historyData=d.entries||[];
+    const s=d.stats||{};
+    document.getElementById('h-total').textContent=s.total_arbs??'0';
+    document.getElementById('h-gain').textContent=s.total_gain_100?'+€'+s.total_gain_100:'€0';
+    document.getElementById('h-trj').textContent=s.avg_trj?(s.avg_trj+'%'):'—';
+    document.getElementById('h-best').textContent=s.best_gain?'+€'+s.best_gain:'—';
+    filterHistory();
+  }catch(e){
+    document.getElementById('history-tbody').innerHTML=`<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">Erreur chargement: ${e.message}</td></tr>`;
+  }
+}
+
+function filterHistory(){
+  const search=document.getElementById('h-search').value.toLowerCase();
+  const sport=document.getElementById('h-sport').value;
+  const filtered=_historyData.filter(e=>
+    (!search||e.match.toLowerCase().includes(search))&&
+    (!sport||e.sport===sport)
+  );
+  const tb=document.getElementById('history-tbody');
+  if(!filtered.length){
+    tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">Aucune entrée correspondante</td></tr>';
+    return;
+  }
+  tb.innerHTML=filtered.map(e=>{
+    const dt=e.detected_at?new Date(e.detected_at).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
+    return `<tr>
+      <td style="color:var(--muted);font-size:.8rem;white-space:nowrap">${dt}</td>
+      <td><strong>${e.match}</strong></td>
+      <td><span class="pill blue">${e.sport}</span></td>
+      <td style="color:var(--muted);font-size:.8rem">${e.bookmakers}</td>
+      <td style="font-size:.85rem">${e.cotes}</td>
+      <td class="arb-gain">+€${e.gain_100}</td>
+      <td>${e.trj}%</td>
+    </tr>`;
+  }).join('');
 }
 
 fetchData();

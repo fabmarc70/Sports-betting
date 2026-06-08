@@ -4,7 +4,7 @@ Inscription gratuite sur https://the-odds-api.com pour obtenir une clé API.
 Lancez avec : python api/server_lite.py
 Configurez votre clé dans la variable ODDS_API_KEY ci-dessous ou via variable d'environnement.
 """
-import os, json, threading, datetime, time
+import os, json, threading, datetime, time, pathlib
 import requests
 from flask import Flask, jsonify
 from flask_cors import CORS
@@ -59,6 +59,46 @@ CACHE = {
     "api_key_configured": False, "requests_remaining": "?"
 }
 LOCK = threading.Lock()
+
+# Fichier d'historique local
+HISTORY_FILE = pathlib.Path(__file__).parent / "history.json"
+MAX_HISTORY = 2000  # entrées max conservées
+
+
+def load_history():
+    if HISTORY_FILE.exists():
+        try:
+            return json.loads(HISTORY_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            return []
+    return []
+
+
+def save_history(entries):
+    try:
+        HISTORY_FILE.write_text(json.dumps(entries, ensure_ascii=False, indent=2), encoding="utf-8")
+    except Exception as e:
+        print(f"  Erreur sauvegarde historique: {e}")
+
+
+def append_to_history(arbs, snapshot_time):
+    """Ajoute les arbitrages du cycle courant à l'historique (sans doublons)."""
+    history = load_history()
+    existing_keys = {(e["match"], e["bookmakers"]) for e in history}
+    added = 0
+    for arb in arbs:
+        key = (arb["match"], arb["bookmakers"])
+        if key not in existing_keys:
+            entry = dict(arb)
+            entry["detected_at"] = snapshot_time
+            history.append(entry)
+            existing_keys.add(key)
+            added += 1
+    # Garde seulement les MAX_HISTORY entrées les plus récentes
+    if len(history) > MAX_HISTORY:
+        history = history[-MAX_HISTORY:]
+    save_history(history)
+    return added
 
 
 def fetch_odds(sport_key):
@@ -247,8 +287,10 @@ def refresh_loop():
                 CACHE["status"] = "ok"
                 CACHE["requests_remaining"] = remaining
 
+            snapshot_time = datetime.datetime.now().isoformat()
+            added = append_to_history(arbs, snapshot_time)
             ts = datetime.datetime.now().strftime("%H:%M:%S")
-            print(f"[{ts}] Rafraîchi — {nb_arb} arbitrages | {len(all_matches)} matchs | Quota restant: {remaining}/mois")
+            print(f"[{ts}] Rafraîchi — {nb_arb} arbitrages | {len(all_matches)} matchs | +{added} historique | Quota: {remaining}/mois")
 
         except Exception as e:
             with LOCK:
@@ -282,6 +324,25 @@ def arbitrages():
 def freebets_route():
     with LOCK:
         return jsonify(CACHE["freebets"])
+
+@app.route("/api/history")
+def history():
+    entries = load_history()
+    # Stats globales
+    nb = len(entries)
+    gains = [e["gain_100"] for e in entries]
+    trjs = [e["trj"] for e in entries]
+    sports_count = {}
+    for e in entries:
+        sports_count[e["sport"]] = sports_count.get(e["sport"], 0) + 1
+    stats = {
+        "total_arbs": nb,
+        "total_gain_100": round(sum(gains), 2) if gains else 0,
+        "avg_trj": round(sum(trjs) / nb, 3) if trjs else 0,
+        "best_gain": round(max(gains), 2) if gains else 0,
+        "sports_breakdown": sports_count,
+    }
+    return jsonify({"entries": list(reversed(entries)), "stats": stats})
 
 @app.route("/api/all")
 def all_data():
