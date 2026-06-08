@@ -3,12 +3,12 @@ API Flask pour SportsBetting Dashboard
 Lance avec : python api/server.py
 """
 import sys
-import io
 import json
 import threading
 import datetime
 import time
 import os
+import pathlib
 
 from flask import Flask, jsonify
 from flask_cors import CORS
@@ -17,15 +17,21 @@ from flask_cors import CORS
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import sportsbetting as sb
-from sportsbetting.user_functions import (
-    best_match_under_conditions, best_match_freebet,
-    best_matches_freebet2
-)
+from sportsbetting.user_functions import best_match_under_conditions
 from sportsbetting.basic_functions import gain
-from sportsbetting.interface_functions import trj_with_min_odd
 
 app = Flask(__name__)
-CORS(app)  # Autorise les requêtes depuis Vercel
+CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+@app.after_request
+def add_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+    response.headers['Access-Control-Allow-Methods'] = 'GET,OPTIONS'
+    return response
+
+HISTORY_FILE = pathlib.Path(__file__).parent / "history.json"
+MAX_HISTORY = 2000
 
 # Cache des résultats (mis à jour en arrière-plan)
 CACHE = {
@@ -39,6 +45,38 @@ CACHE = {
 CACHE_LOCK = threading.Lock()
 
 
+def load_history():
+    if HISTORY_FILE.exists():
+        try:
+            return json.loads(HISTORY_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            return []
+    return []
+
+def save_history(entries):
+    try:
+        HISTORY_FILE.write_text(json.dumps(entries, ensure_ascii=False, indent=2), encoding="utf-8")
+    except Exception as e:
+        print(f"  Erreur sauvegarde historique: {e}")
+
+def append_to_history(arbs, snapshot_time):
+    history = load_history()
+    existing_keys = {(e["match"], e["bookmakers"]) for e in history}
+    added = 0
+    for arb in arbs:
+        key = (arb["match"], arb["bookmakers"])
+        if key not in existing_keys:
+            entry = dict(arb)
+            entry["detected_at"] = snapshot_time
+            history.append(entry)
+            existing_keys.add(key)
+            added += 1
+    if len(history) > MAX_HISTORY:
+        history = history[-MAX_HISTORY:]
+    save_history(history)
+    return added
+
+
 def compute_arbitrages():
     """Trouve les meilleures opportunités d'arbitrage dans les cotes chargées."""
     results = []
@@ -48,15 +86,14 @@ def compute_arbitrages():
                 odds_dict = data.get("odds", {})
                 if len(odds_dict) < 2:
                     continue
-                # Calcule le TRJ
+                n_outcomes = len(list(odds_dict.values())[0])
                 best_odds_per_outcome = []
                 best_books = []
-                n_outcomes = len(list(odds_dict.values())[0])
                 for i in range(n_outcomes):
                     best_odd = 0
                     best_book = ""
                     for book, odds_list in odds_dict.items():
-                        if odds_list[i] > best_odd:
+                        if len(odds_list) > i and odds_list[i] > best_odd:
                             best_odd = odds_list[i]
                             best_book = book
                     best_odds_per_outcome.append(best_odd)
@@ -65,20 +102,23 @@ def compute_arbitrages():
                 if 0 in best_odds_per_outcome:
                     continue
 
-                trj = gain(best_odds_per_outcome)
-                if trj > 0:  # TRJ > 100%
+                trj_val = gain(best_odds_per_outcome)
+                if trj_val > 0:
                     date_obj = data.get("date")
-                    date_str = date_obj.strftime("%d/%m %H:%M") if date_obj and date_obj != "undefined" else "?"
+                    date_str = date_obj.isoformat() if date_obj and date_obj != "undefined" else ""
+                    trj_inv = sum(1/o for o in best_odds_per_outcome)
+                    breakdown = [{"outcome": f"Issue {i+1}", "bookmaker": best_books[i], "odd": round(best_odds_per_outcome[i], 2), "stake_pct": round((1/best_odds_per_outcome[i])/trj_inv*100, 2)} for i in range(len(best_odds_per_outcome))]
                     results.append({
                         "match": match,
                         "sport": sport,
                         "competition": data.get("competition", ""),
                         "bookmakers": " / ".join(dict.fromkeys(best_books)),
                         "cotes": " / ".join(str(round(o, 2)) for o in best_odds_per_outcome),
-                        "trj": round((1 + trj) * 100, 3),
-                        "gain_100": round(trj * 100, 2),
+                        "trj": round((1 + trj_val) * 100, 3),
+                        "gain_100": round(trj_val * 100, 2),
                         "date": date_str,
-                        "status": "live"
+                        "status": "live",
+                        "breakdown": breakdown,
                     })
             except Exception:
                 continue
@@ -88,49 +128,7 @@ def compute_arbitrages():
 
 
 def compute_freebets():
-    """Calcule les meilleurs taux de conversion freebet par bookmaker."""
-    results = []
-    sports_available = [s for s in sb.ODDS if sb.ODDS[s]]
-    if not sports_available:
-        return results
-
-    for site in sb.BOOKMAKERS[:8]:  # Top 8 bookmakers
-        best_rate = 0
-        best_sport = ""
-        best_match = ""
-        for sport in sports_available:
-            try:
-                old_stdout = sys.stdout
-                sys.stdout = buf = io.StringIO()
-                best_match_freebet(site, 100, sport)
-                sys.stdout = old_stdout
-                output = buf.getvalue()
-                if "No match found" in output or not output.strip():
-                    continue
-                # Extrait le taux depuis la sortie
-                for line in output.split("\n"):
-                    if "Taux" in line or "taux" in line or "%" in line:
-                        import re
-                        match_rate = re.search(r'(\d+\.?\d*)\s*%', line)
-                        if match_rate:
-                            rate = float(match_rate.group(1))
-                            if rate > best_rate:
-                                best_rate = rate
-                                best_sport = sport
-                                best_match = output.split("\n")[0]
-            except Exception:
-                pass
-
-        if best_rate > 0:
-            results.append({
-                "site": site,
-                "taux": round(best_rate, 1),
-                "sport": best_sport,
-                "match": best_match[:40] if best_match else ""
-            })
-
-    results.sort(key=lambda x: x["taux"], reverse=True)
-    return results
+    return []
 
 
 def refresh_loop():
@@ -140,23 +138,18 @@ def refresh_loop():
             with CACHE_LOCK:
                 CACHE["status"] = "refreshing"
 
-            # Charge les cotes pour tous les sports
-            for sport in ["football", "tennis", "basketball", "rugby"]:
+            print("  Chargement des cotes bookmakers (Chrome)...")
+            for sport in ["football", "tennis", "basketball"]:
                 try:
-                    old_stdout = sys.stdout
-                    sys.stdout = io.StringIO()
-                    best_match_under_conditions(
-                        "betclic", 1.01, 100, sport,
-                        one_site=False
-                    )
-                    sys.stdout = old_stdout
-                except Exception:
-                    sys.stdout = old_stdout
+                    print(f"  Scan {sport}...")
+                    best_match_under_conditions("betclic", 1.01, 100, sport, one_site=False)
+                    nb = sum(len(v) for v in sb.ODDS.get(sport, {}).values()) if hasattr(sb.ODDS.get(sport, {}), 'values') else len(sb.ODDS.get(sport, {}))
+                    print(f"    → {len(sb.ODDS.get(sport, {}))} matchs chargés pour {sport}")
+                except Exception as e:
+                    print(f"    Erreur {sport}: {e}")
 
             arbs = compute_arbitrages()
             fbs = compute_freebets()
-
-            # KPIs
             total_gain = sum(a["gain_100"] for a in arbs)
             avg_trj = (sum(a["trj"] for a in arbs) / len(arbs)) if arbs else 100.0
 
@@ -167,22 +160,24 @@ def refresh_loop():
                     "nb_arbitrages": len(arbs),
                     "gain_potentiel": round(total_gain, 2),
                     "trj_moyen": round(avg_trj, 3),
-                    "nb_bookmakers": len(set(
-                        b for a in arbs for b in a["bookmakers"].split(" / ")
-                    )),
+                    "nb_bookmakers": len(set(b for a in arbs for b in a["bookmakers"].split(" / "))) if arbs else 0,
                     "nb_freebets": len(fbs)
                 }
                 CACHE["last_update"] = datetime.datetime.now().isoformat()
                 CACHE["status"] = "ok"
 
-            print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] Rafraîchi — {len(arbs)} arbitrages trouvés")
+            snapshot_time = datetime.datetime.now().isoformat()
+            added = append_to_history(arbs, snapshot_time)
+            ts = datetime.datetime.now().strftime("%H:%M:%S")
+            print(f"[{ts}] Rafraîchi — {len(arbs)} arbitrages | +{added} historique")
 
         except Exception as e:
             with CACHE_LOCK:
                 CACHE["status"] = f"error: {str(e)}"
             print(f"Erreur refresh: {e}")
+            import traceback; traceback.print_exc()
 
-        time.sleep(300)  # 5 minutes
+        time.sleep(300)
 
 
 # ── Routes ──────────────────────────────────────────────
@@ -216,15 +211,35 @@ def freebets():
 
 @app.route("/api/all")
 def all_data():
-    """Endpoint unique pour tout récupérer en une requête."""
     with CACHE_LOCK:
         return jsonify({
             "kpis": CACHE["kpis"],
             "arbitrages": CACHE["arbitrages"],
             "freebets": CACHE["freebets"],
             "last_update": CACHE["last_update"],
-            "status": CACHE["status"]
+            "status": CACHE["status"],
+            "api_key_configured": True,
+            "requests_remaining": "N/A"
         })
+
+
+@app.route("/api/history")
+def history():
+    entries = load_history()
+    nb = len(entries)
+    gains = [e["gain_100"] for e in entries]
+    trjs = [e["trj"] for e in entries]
+    sports_count = {}
+    for e in entries:
+        sports_count[e["sport"]] = sports_count.get(e["sport"], 0) + 1
+    stats = {
+        "total_arbs": nb,
+        "total_gain_100": round(sum(gains), 2) if gains else 0,
+        "avg_trj": round(sum(trjs) / nb, 3) if trjs else 0,
+        "best_gain": round(max(gains), 2) if gains else 0,
+        "sports_breakdown": sports_count,
+    }
+    return jsonify({"entries": list(reversed(entries)), "stats": stats})
 
 
 if __name__ == "__main__":
