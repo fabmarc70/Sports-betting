@@ -9,13 +9,14 @@ echo.
 echo Installation des dependances (peut prendre 2-3 min)...
 echo.
 
-pip install flask flask-cors requests -q
+pip install "flask==2.2.5" flask-cors requests -q
+pip install "blinker==1.4" -q
 pip install selenium chromedriver-autoinstaller fake-useragent -q
 pip install unidecode numpy beautifulsoup4 lxml termcolor colorama -q
 pip install python-dateutil stopit tabulate pillow demjson3 scipy -q
-pip install selenium-wire pyopenssl websockets -q
+pip install "selenium-wire==4.6.3" pyopenssl websockets -q
 pip install pywin32 -q
-pip install blinker==1.4 -q
+pip install PySimpleGUI -q
 
 echo.
 echo ================================================
