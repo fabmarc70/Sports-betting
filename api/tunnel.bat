@@ -16,6 +16,6 @@ if not exist "%~dp0cloudflared.exe" (
 )
 
 echo Lancement du tunnel...
-"%~dp0cloudflared.exe" tunnel --url http://localhost:5000
+"%~dp0cloudflared.exe" tunnel --url http://127.0.0.1:5000
 
 pause
