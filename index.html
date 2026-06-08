@@ -178,8 +178,11 @@ function switchTab(id){
 }
 
 // Charge l'URL sauvegardée
-const savedUrl = localStorage.getItem('sb_api_url');
-if(savedUrl) document.getElementById('api-input').value = savedUrl;
+// URL du tunnel — mise à jour automatiquement à chaque déploiement
+const DEFAULT_API = 'https://colors-near-planners-intranet.trycloudflare.com';
+const savedUrl = localStorage.getItem('sb_api_url') || DEFAULT_API;
+localStorage.setItem('sb_api_url', savedUrl);
+document.getElementById('api-input').value = savedUrl;
 
 function saveApi(){
   const url = document.getElementById('api-input').value.trim().replace(/\/$/,'');
