@@ -9,7 +9,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="SportsBetting" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="apple-touch-icon" href="icon-180.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="icon-16.png" />
   <style>
     :root {
       --bg: #0a0c11;
@@ -391,6 +393,17 @@
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* SVG icon sizing */
+    .icon { display: inline-block; vertical-align: middle; flex-shrink: 0; }
+    .icon-sm  { width: 14px; height: 14px; }
+    .icon-md  { width: 18px; height: 18px; }
+    .icon-lg  { width: 26px; height: 26px; }
+    .icon-xl  { width: 44px; height: 44px; }
+    .nav-icon .icon { width: 22px; height: 22px; }
+    .logo-icon .icon { width: 22px; height: 22px; }
+    .es-icon .icon { width: 44px; height: 44px; }
+    .fb-icon .icon { width: 26px; height: 26px; }
   </style>
 </head>
 <body>
@@ -398,7 +411,7 @@
 <!-- HEADER -->
 <header>
   <div class="logo-wrap" ondblclick="toggleApiPanel()">
-    <span class="logo-icon">⚽</span>
+    <span class="logo-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 6.6 2.5M12 2a10 10 0 0 0-6.6 2.5M2.4 8.5h19.2M2.4 15.5h19.2M12 22a10 10 0 0 1-6.6-2.5M12 22a10 10 0 0 0 6.6-2.5"/><ellipse cx="12" cy="12" rx="4" ry="10"/></svg></span>
     <div class="logo-text">Sports<span>Betting</span></div>
   </div>
   <span class="status-dot demo" id="status-dot">Démo</span>
@@ -406,7 +419,7 @@
 
 <!-- API PANEL -->
 <div id="api-banner">
-  <label>🔗 URL de votre API Cloudflare</label>
+  <label><svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> URL de votre API Cloudflare</label>
   <div class="api-row">
     <input id="api-input" type="url" placeholder="https://xxxxx.trycloudflare.com" />
     <button id="api-save" onclick="saveApi()">Connecter</button>
@@ -437,7 +450,7 @@
   <div class="section-label">Meilleures opportunités</div>
   <div id="arb-list">
     <div class="empty-state">
-      <div class="es-icon">🔍</div>
+      <div class="es-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
       <div class="es-title">Connectez votre API</div>
       <div class="es-sub">Double-cliquez sur le logo pour configurer l'URL de votre tunnel Cloudflare</div>
     </div>
@@ -450,7 +463,7 @@
   <div class="section-label">Performances des bookmakers</div>
   <div id="fb-list">
     <div class="empty-state">
-      <div class="es-icon">🎁</div>
+      <div class="es-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
       <div class="es-title">Aucune donnée</div>
       <div class="es-sub">Les performances s'afficheront une fois les arbitrages chargés</div>
     </div>
@@ -509,7 +522,7 @@
   </div>
 
   <div class="search-row">
-    <input class="search-input" id="h-search" type="text" placeholder="🔍  Rechercher un match…" oninput="filterHistory()" />
+    <input class="search-input" id="h-search" type="text" placeholder="Rechercher un match…" oninput="filterHistory()" />
     <select class="search-select" id="h-sport" onchange="filterHistory()">
       <option value="">Tous</option>
       <option value="football">Football</option>
@@ -521,7 +534,7 @@
   <div class="section-label">Journal</div>
   <div id="history-list">
     <div class="empty-state">
-      <div class="es-icon">📋</div>
+      <div class="es-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
       <div class="es-title">Historique vide</div>
       <div class="es-sub">Il se constituera automatiquement à chaque scan (toutes les 5 min)</div>
     </div>
@@ -540,7 +553,7 @@
         <span class="m-tag date" id="calc-date-badge"></span>
       </div>
     </div>
-    <div class="alert-bar">⚡ Agissez vite — cotes valables 2 à 3 min. Placez tous les paris dans l'ordre.</div>
+    <div class="alert-bar" style="display:flex;align-items:center;gap:8px"><svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Agissez vite — cotes valables 2 à 3 min. Placez tous les paris dans l'ordre.</div>
     <div class="modal-body">
       <div class="stake-section">
         <div class="stake-label">Montant total à répartir</div>
@@ -575,21 +588,21 @@
 <nav>
   <div class="nav-item active" id="nav-arb" onclick="switchPage('arb')">
     <div class="nav-item-wrap">
-      <div class="nav-icon">⚡</div>
+      <div class="nav-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
       <span id="nav-badge" class="nav-badge" style="display:none">0</span>
     </div>
     Arbitrages
   </div>
   <div class="nav-item" id="nav-freebets" onclick="switchPage('freebets')">
-    <div class="nav-item-wrap"><div class="nav-icon">🎁</div></div>
-    Freebets
+    <div class="nav-item-wrap"><div class="nav-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div></div>
+    Bookmakers
   </div>
   <div class="nav-item" id="nav-stats" onclick="switchPage('stats')">
-    <div class="nav-item-wrap"><div class="nav-icon">📊</div></div>
+    <div class="nav-item-wrap"><div class="nav-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div></div>
     Stats
   </div>
   <div class="nav-item" id="nav-history" onclick="switchPage('history')">
-    <div class="nav-item-wrap"><div class="nav-icon">📋</div></div>
+    <div class="nav-item-wrap"><div class="nav-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg></div></div>
     Historique
   </div>
 </nav>
@@ -632,9 +645,15 @@ const TEAMS_FR = {
 function tr(n){return TEAMS_FR[n]||n;}
 
 const SPORT_FR   = {football:'Football',basketball:'Basketball',tennis:'Tennis',rugby:'Rugby'};
-const SPORT_ICON = {football:'⚽',basketball:'🏀',tennis:'🎾',rugby:'🏉'};
+const SPORT_SVG = {
+  football: `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 6.6 2.5M12 2a10 10 0 0 0-6.6 2.5M2.4 8.5h19.2M2.4 15.5h19.2M12 22a10 10 0 0 1-6.6-2.5M12 22a10 10 0 0 0 6.6-2.5"/><ellipse cx="12" cy="12" rx="4" ry="10"/></svg>`,
+  basketball:`<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93a10 10 0 0 1 14.14 14.14M4.93 19.07A10 10 0 0 1 19.07 4.93"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>`,
+  tennis:    `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M6.7 3.4a10 10 0 0 0 0 17.2M17.3 3.4a10 10 0 0 1 0 17.2"/></svg>`,
+  rugby:     `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="12" rx="9" ry="6" transform="rotate(45 12 12)"/><line x1="5" y1="5" x2="19" y2="19"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="12" y1="9" x2="12" y2="15"/></svg>`,
+  default:   `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>`,
+};
 function sportFr(s){return SPORT_FR[s]||s;}
-function sportIcon(s){return SPORT_ICON[s]||'🏆';}
+function sportIcon(s){return SPORT_SVG[s]||SPORT_SVG.default;}
 
 const MARKET_LABEL = {
   football:'1X2',basketball:'Vainqueur',tennis:'Vainqueur',rugby:'1X2',
@@ -689,7 +708,7 @@ function renderArbitrages(arbs){
 
   if(!arbs.length){
     el.innerHTML=`<div class="empty-state">
-      <div class="es-icon">🔎</div>
+      <div class="es-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><line x1="8" y1="11" x2="14" y2="11"/></svg></div>
       <div class="es-title">Aucun arbitrage détecté</div>
       <div class="es-sub">Le scan tourne en arrière-plan. Prochain rafraîchissement dans 60s.</div>
     </div>`;
@@ -739,7 +758,7 @@ function renderArbitrages(arbs){
       <div class="odds-row">${oddsHtml}</div>
       <div class="match-footer">
         <div class="gain-badge">+€${r.gain_100} / €100</div>
-        <div class="calc-cta">🧮 Calculer</div>
+        <div class="calc-cta"><svg class="icon icon-sm" style="margin-right:3px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/></svg> Calculer</div>
         <div class="trj-badge">TRJ ${r.trj}%</div>
       </div>
     </div>`;
@@ -750,16 +769,17 @@ function renderArbitrages(arbs){
 function renderFreebets(fbs){
   const el = document.getElementById('fb-list');
   if(!fbs.length){
-    el.innerHTML=`<div class="empty-state"><div class="es-icon">🎁</div><div class="es-title">Aucune donnée</div></div>`;
+    el.innerHTML=`<div class="empty-state"><div class="es-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div><div class="es-title">Aucune donnée</div></div>`;
     return;
   }
   const isReal = fbs[0] && fbs[0]._real;
   el.innerHTML = fbs.map(r=>{
-    const icons = {betclic:'🟦',winamax:'🟥',unibet:'🟩',pmu:'🟫',bwin:'🟪',parionssport:'🟧',zebet:'⬛',netbet:'🔵'};
-    const icon = icons[r.site] || '🏦';
+    const bmColors = {betclic:'#0066cc',winamax:'#e2001a',unibet:'#00a651',pmu:'#004a97',bwin:'#006633',parionssport:'#e8000d',zebet:'#1a1a1a',netbet:'#0033a0'};
+    const bmColor = bmColors[r.site] || '#f5c518';
+    const bmInitial = r.site.charAt(0).toUpperCase();
     const valStr = isReal ? `+€${r.taux} / arb` : `${r.taux}% conv.`;
     return `<div class="fb-card">
-      <div class="fb-icon">${icon}</div>
+      <div class="fb-icon" style="width:36px;height:36px;border-radius:8px;background:${bmColor};display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:900;color:#fff;flex-shrink:0">${bmInitial}</div>
       <div class="fb-info">
         <div class="fb-name">${r.site.replace(/_fr|_nl/g,'').replace(/^\w/,c=>c.toUpperCase())}</div>
         <div class="fb-meta">${r.match||sportFr(r.sport)}</div>
@@ -891,7 +911,7 @@ async function fetchData(){
 
   }catch(e){
     dot.className='status-dot offline'; dot.textContent='Hors ligne';
-    footer.textContent = '⚠ API inaccessible — vérifiez que server_lite.py et tunnel.bat tournent';
+    footer.textContent = 'API inaccessible — vérifiez que server_lite.py et tunnel.bat tournent';
   }
 }
 
@@ -912,7 +932,7 @@ async function fetchHistory(){
     document.getElementById('h-best').textContent=s.best_gain?'+€'+s.best_gain:'—';
     filterHistory();
   }catch(e){
-    document.getElementById('history-list').innerHTML=`<div class="empty-state"><div class="es-icon">⚠️</div><div class="es-title">Erreur</div><div class="es-sub">${e.message}</div></div>`;
+    document.getElementById('history-list').innerHTML=`<div class="empty-state"><div class="es-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div class="es-title">Erreur</div><div class="es-sub">${e.message}</div></div>`;
   }
 }
 
@@ -925,7 +945,7 @@ function filterHistory(){
   );
   const el=document.getElementById('history-list');
   if(!filtered.length){
-    el.innerHTML=`<div class="empty-state"><div class="es-icon">🔍</div><div class="es-title">Aucun résultat</div></div>`;
+    el.innerHTML=`<div class="empty-state"><div class="es-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div><div class="es-title">Aucun résultat</div></div>`;
     return;
   }
   const sportPillColor={football:'#1a2540',basketball:'#2a1a40',tennis:'#0d2a1a'};
@@ -940,8 +960,8 @@ function filterHistory(){
         <div class="hist-gain">+€${e.gain_100}</div>
       </div>
       <div class="hist-meta">
-        <span class="hist-date">📅 ${dt}</span>
-        <span class="pill-sport" style="background:${bg};color:${tc}">${sportIcon(e.sport)} ${sportFr(e.sport)}</span>
+        <span class="hist-date" style="display:flex;align-items:center;gap:3px"><svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${dt}</span>
+        <span class="pill-sport" style="background:${bg};color:${tc};display:inline-flex;align-items:center;gap:3px">${sportIcon(e.sport)} ${sportFr(e.sport)}</span>
         <span class="hist-trj">TRJ ${e.trj}%</span>
         <span class="hist-bm">${e.bookmakers}</span>
       </div>
@@ -979,9 +999,9 @@ function openCalc(idx){
   _currentArb = _arbData[idx];
   const a = _currentArb;
   document.getElementById('calc-match').textContent = a.match.split(' vs ').map(tr).join(' vs ');
-  document.getElementById('calc-sport-badge').textContent = `${sportIcon(a.sport)} ${sportFr(a.sport)}`;
+  document.getElementById('calc-sport-badge').innerHTML = `${sportIcon(a.sport)} ${sportFr(a.sport)}`;
   document.getElementById('calc-trj-badge').textContent = 'TRJ '+a.trj+'%';
-  const d = a.date ? (() => { try { const dt=new Date(a.date); return isNaN(dt)?'':'⏰ '+dt.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}); } catch(e){return '';} })() : '';
+  const d = a.date ? (() => { try { const dt=new Date(a.date); return isNaN(dt)?'':dt.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}); } catch(e){return '';} })() : '';
   document.getElementById('calc-date-badge').textContent = d;
   document.getElementById('calc-stake').value = 100;
   updateCalc();
@@ -1013,7 +1033,7 @@ function updateCalc(){
       <div class="step-top">
         <span class="step-num">${i+1}</span>
         <span class="step-bm-name">${bmName(row.bookmaker)}</span>
-        <a class="step-link" href="https://${bmUrl}" target="_blank" rel="noopener">🔗 Ouvrir</a>
+        <a class="step-link" href="https://${bmUrl}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:3px"><svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> Ouvrir</a>
       </div>
       <div class="step-fields three">
         <div class="step-field">
