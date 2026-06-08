@@ -20,16 +20,14 @@ ODDS_API_KEY = os.environ.get("ODDS_API_KEY", "2dd8f5e82d2c99c2950e7c9aae554d22"
 
 ODDS_API_BASE = "https://api.the-odds-api.com/v4"
 
-# Sports supportés (clés The Odds API)
-SPORT_KEYS = {
-    "football": "soccer_france_ligue1",
-    "tennis":   "tennis_atp_french_open",
-    "basketball": "basketball_euroleague",
-    "rugby":    "rugbyleague_nrl",
+# Groupes de sports — le premier disponible dans chaque groupe est utilisé
+SPORT_GROUPS = {
+    "football":   ["soccer_france_ligue1", "soccer_epl", "soccer_uefa_champs_league",
+                   "soccer_spain_la_liga", "soccer_germany_bundesliga", "soccer_italy_serie_a"],
+    "basketball": ["basketball_euroleague", "basketball_nba", "basketball_ncaab"],
+    "tennis":     ["tennis_atp_french_open", "tennis_atp_wimbledon", "tennis_atp_us_open",
+                   "tennis_wta_us_open"],
 }
-
-# Sports à scanner (ajouter d'autres depuis https://the-odds-api.com/sports-odds-data/sports-apis/)
-ACTIVE_SPORTS = ["football", "basketball"]
 
 BOOKMAKERS_FR = [
     "betclic", "unibet_fr", "winamax", "pmu_fr",
@@ -183,22 +181,28 @@ def refresh_loop():
 
             all_matches = []
             remaining = "?"
-            for sport_name in ACTIVE_SPORTS:
-                sport_key = SPORT_KEYS[sport_name]
-                print(f"  Scan {sport_name} ({sport_key})...")
-                events, rem = fetch_odds(sport_key)
-                if events is None:
-                    if rem == "invalid_key":
-                        with LOCK:
-                            CACHE["status"] = "invalid_key"
-                        time.sleep(60)
+            stop = False
+            for sport_name, sport_keys in SPORT_GROUPS.items():
+                if stop:
+                    break
+                for sport_key in sport_keys:
+                    print(f"  Scan {sport_name} ({sport_key})...")
+                    events, rem = fetch_odds(sport_key)
+                    if events is None:
+                        if rem == "invalid_key":
+                            with LOCK:
+                                CACHE["status"] = "invalid_key"
+                            stop = True
                         break
-                    continue
-                remaining = rem
-                matches = parse_matches(events, sport_name)
-                all_matches.extend(matches)
-                print(f"    → {len(matches)} matchs")
-                time.sleep(2)  # Respecte le rate limit
+                    remaining = rem
+                    matches = parse_matches(events, sport_name)
+                    if matches:
+                        all_matches.extend(matches)
+                        print(f"    → {len(matches)} matchs")
+                        break  # Sport trouvé, passe au groupe suivant
+                    else:
+                        print(f"    → 0 matchs, essai suivant...")
+                    time.sleep(1)  # Respecte le rate limit
 
             arbs = find_arbitrages(all_matches)
             nb_arb = len(arbs)
