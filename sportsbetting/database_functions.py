@@ -25,8 +25,8 @@ def get_id_from_competition_name(competition, sport):
     conn = sqlite3.connect(sb.PATH_DB)
     c = conn.cursor()
     c.execute("""
-    SELECT id FROM competitions WHERE competition = "{}" AND sport='{}'
-    """.format(competition, sport))
+    SELECT id FROM competitions WHERE competition = ? AND sport = ?
+    """, (competition, sport))
     return c.fetchone()[0]
 
 
@@ -37,8 +37,8 @@ def get_competition_by_id(_id, site):
     conn = sqlite3.connect(sb.PATH_DB)
     c = conn.cursor()
     c.execute("""
-    SELECT url_{} FROM competitions WHERE id='{}'
-    """.format(str(site), _id))
+    SELECT url_{} FROM competitions WHERE id = ?
+    """.format(str(site)), (_id,))
     return c.fetchone()[0]
 
 
@@ -50,8 +50,8 @@ def get_formatted_name(name, site, sport):
     conn = sqlite3.connect(sb.PATH_DB)
     c = conn.cursor()
     res = list(c.execute("""
-    SELECT name FROM names WHERE sport="{}" AND name_{}="{}"
-    """.format(sport, site, name)))
+    SELECT name FROM names WHERE sport = ? AND name_{} = ?
+    """.format(site), (sport, name)))
     c.close()
     try:
         return res[0][0]
@@ -72,8 +72,8 @@ def get_competition_id(name, sport):
     conn = sqlite3.connect(sb.PATH_DB)
     c = conn.cursor()
     c.execute("""
-    SELECT id, competition FROM competitions WHERE sport='{}'
-    """.format(sport))
+    SELECT id, competition FROM competitions WHERE sport = ?
+    """, (sport,))
     for line in c.fetchall():
         strings_name = name.lower().split()
         possible = True
@@ -92,8 +92,8 @@ def get_competition_url(name, sport, site):
     conn = sqlite3.connect(sb.PATH_DB)
     c = conn.cursor()
     c.execute("""
-    SELECT competition, url_{} FROM competitions WHERE sport='{}'
-    """.format(site, sport))
+    SELECT competition, url_{} FROM competitions WHERE sport = ?
+    """.format(site), (sport,))
     for line in c.fetchall():
         strings_name = name.lower().split()
         possible = True
@@ -109,8 +109,8 @@ def is_url_in_db(url, site):
     conn = sqlite3.connect(sb.PATH_DB)
     c = conn.cursor()
     c.execute("""
-    SELECT competition FROM competitions WHERE url_{}='{}'
-    """.format(site, url))
+    SELECT competition FROM competitions WHERE url_{} = ?
+    """.format(site), (url,))
     return bool(c.fetchone())
 
 
@@ -129,8 +129,8 @@ def import_teams_by_url(url):
             if not is_id_in_db(_id):
                 c.execute("""
                 INSERT INTO names (id, name, sport)
-                VALUES ({}, "{}", "{}")
-                """.format(_id, line.text, sport))
+                VALUES (?, ?, ?)
+                """, (_id, line.text, sport))
                 conn.commit()
     c.close()
 
@@ -164,8 +164,8 @@ def is_id_in_db(_id):
     conn = sqlite3.connect(sb.PATH_DB)
     c = conn.cursor()
     c.execute("""
-    SELECT id FROM names WHERE id="{}"
-    """.format(_id))
+    SELECT id FROM names WHERE id = ?
+    """, (_id,))
     for line in c.fetchall():
         return line
 
@@ -178,12 +178,12 @@ def is_in_db(name, sport, site, only_null=True):
     c = conn.cursor()
     if only_null:
         c.execute("""
-        SELECT id, name FROM names WHERE sport="{}" AND name="{}" and name_{} IS NULL
-        """.format(sport, name, site))
+        SELECT id, name FROM names WHERE sport = ? AND name = ? AND name_{} IS NULL
+        """.format(site), (sport, name))
     else:
         c.execute("""
-        SELECT id FROM names WHERE sport="{}" AND name="{}"
-        """.format(sport, name))
+        SELECT id FROM names WHERE sport = ? AND name = ?
+        """, (sport, name))
     return list(c.fetchall())
 
 
@@ -195,8 +195,8 @@ def is_in_db_site(name, sport, site):
     conn = sqlite3.connect(sb.PATH_DB)
     c = conn.cursor()
     c.execute("""
-    SELECT id FROM names WHERE sport="{}" AND name_{}="{}"
-    """.format(sport, site, name))
+    SELECT id FROM names WHERE sport = ? AND name_{} = ?
+    """.format(site), (sport, name))
     for line in c.fetchall():
         return line
 
@@ -208,15 +208,15 @@ def get_formatted_name_by_id(_id):
     conn = sqlite3.connect(sb.PATH_DB)
     c = conn.cursor()
     c.execute("""
-    SELECT name FROM names WHERE id='{}'
-    """.format(_id))
+    SELECT name FROM names WHERE id = ?
+    """, (_id,))
     try:
         return c.fetchone()[0]
     except TypeError:
         add_id_to_db(_id)
         c.execute("""
-        SELECT name FROM names WHERE id='{}'
-        """.format(_id))
+        SELECT name FROM names WHERE id = ?
+        """, (_id,))
         return c.fetchone()[0]
 
 
@@ -239,8 +239,8 @@ def add_id_to_db(_id):
             c = conn.cursor()
             c.execute("""
             INSERT INTO names (id, name, sport, category)
-            VALUES ({}, "{}", "{}", "{}")
-            """.format(_id, name, sport, category))
+            VALUES (?, ?, ?, ?)
+            """, (_id, name, sport, category))
             conn.commit()
             c.close()
             break
@@ -256,8 +256,8 @@ def add_id_to_db(_id):
             c = conn.cursor()
             c.execute("""
             INSERT INTO names (id, name, sport, category)
-            VALUES ({}, "{}", "{}", "{}")
-            """.format(_id, name, sport, category))
+            VALUES (?, ?, ?, ?)
+            """, (_id, name, sport, category))
             conn.commit()
             c.close()
 
@@ -275,8 +275,8 @@ def add_id_to_db_thesportsdb(_id):
     c = conn.cursor()
     c.execute("""
     INSERT INTO names (id, name, sport)
-    VALUES ({}, "{}", "{}")
-    """.format(_id, name, sport))
+    VALUES (?, ?, ?)
+    """, (_id, name, sport))
     conn.commit()
     c.close()
 
@@ -288,8 +288,8 @@ def get_sport_by_id(_id):
     conn = sqlite3.connect(sb.PATH_DB)
     c = conn.cursor()
     c.execute("""
-    SELECT sport FROM names WHERE id='{}'
-    """.format(_id))
+    SELECT sport FROM names WHERE id = ?
+    """, (_id,))
     try:
         return c.fetchone()[0]
     except TypeError:
@@ -298,8 +298,8 @@ def get_sport_by_id(_id):
         else:
             add_id_to_db_thesportsdb(_id)
         c.execute("""
-        SELECT sport FROM names WHERE id='{}'
-        """.format(_id))
+        SELECT sport FROM names WHERE id = ?
+        """, (_id,))
         return c.fetchone()[0]
 
 
@@ -336,22 +336,22 @@ def add_name_to_db(_id, name, site, check=False, date_next_match=None, date_next
         if not check or ans in ['y', 'Yes']:
             c.execute("""
             UPDATE names
-            SET name_{0} = "{1}"
+            SET name_{0} = ?
             WHERE _rowid_ = (
                 SELECT _rowid_
                 FROM names
-                WHERE id = {2} AND name_{0} IS NULL
+                WHERE id = ? AND name_{0} IS NULL
                 ORDER BY _rowid_
                 LIMIT 1
             );
-            """.format(site, name, _id))
+            """.format(site), (name, _id))
         else:
             return False
     else:
         c.execute("""
         SELECT sport, name, name_{} FROM names
-        WHERE id = {}
-        """.format(site, _id))
+        WHERE id = ?
+        """.format(site), (_id,))
         sport, formatted_name, name_site = c.fetchone()
         if name and name != name_site:
             if check:
@@ -374,20 +374,20 @@ def add_name_to_db(_id, name, site, check=False, date_next_match=None, date_next
                 if name_site and not is_id_available_for_site(_id, site):
                     c.execute("""
                     INSERT INTO names (id, name, sport, category, name_{})
-                    VALUES ({}, "{}", "{}", "{}", "{}")
-                    """.format(site, _id, formatted_name, sport, get_category(_id), name))
+                    VALUES (?, ?, ?, ?, ?)
+                    """.format(site), (_id, formatted_name, sport, get_category(_id), name))
                 else:
                     c.execute("""
                     UPDATE names
-                    SET name_{0} = "{1}"
+                    SET name_{0} = ?
                     WHERE _rowid_ = (
                         SELECT _rowid_
                         FROM names
-                        WHERE id = {2} AND name_{0} IS NULL
+                        WHERE id = ? AND name_{0} IS NULL
                         ORDER BY _rowid_
                         LIMIT 1
                     );
-                    """.format(site, name, _id))
+                    """.format(site), (name, _id))
             else:
                 return False
     c.close()
@@ -403,8 +403,8 @@ def is_id_available_for_site(_id, site):
     conn = sqlite3.connect(sb.PATH_DB)
     c = conn.cursor()
     c.execute("""
-    SELECT name_{} FROM names WHERE id = {}
-    """.format(site, _id))
+    SELECT name_{} FROM names WHERE id = ?
+    """.format(site), (_id,))
     for line in c.fetchall():
         if line[0] is None:
             return True
@@ -419,12 +419,12 @@ def get_close_name(name, sport, site, only_null=True):
     c = conn.cursor()
     if only_null:
         c.execute("""
-        SELECT id, name FROM names WHERE sport='{}' AND name_{} IS NULL
-        """.format(sport, site))
+        SELECT id, name FROM names WHERE sport = ? AND name_{} IS NULL
+        """.format(site), (sport,))
     else:
         c.execute("""
-        SELECT id, name FROM names WHERE sport='{}'
-        """.format(sport))
+        SELECT id, name FROM names WHERE sport = ?
+        """, (sport,))
     results = []
     for line in c.fetchall():
         if (unidecode.unidecode(name.lower()) in unidecode.unidecode(line[1].lower())
@@ -449,12 +449,12 @@ def get_close_name2(name, sport, site, only_null=True):
     c = conn.cursor()
     if only_null:
         c.execute("""
-        SELECT id, name FROM names WHERE sport='{}' AND name_{} IS NULL
-        """.format(sport, site))
+        SELECT id, name FROM names WHERE sport = ? AND name_{} IS NULL
+        """.format(site), (sport,))
     else:
         c.execute("""
-        SELECT id, name FROM names WHERE sport='{}'
-        """.format(sport))
+        SELECT id, name FROM names WHERE sport = ?
+        """, (sport,))
     results = []
     for line in c.fetchall():
         string_line = line[1].split("(")[0].strip()
@@ -490,12 +490,12 @@ def get_close_name3(name, sport, site, only_null=True):
             c = conn.cursor()
             if only_null:
                 c.execute("""
-                SELECT id, name FROM names WHERE sport='{}' AND name_{} IS NULL
-                """.format(sport, site))
+                SELECT id, name FROM names WHERE sport = ? AND name_{} IS NULL
+                """.format(site), (sport,))
             else:
                 c.execute("""
-                SELECT id, name FROM names WHERE sport='{}'
-                """.format(sport))
+                SELECT id, name FROM names WHERE sport = ?
+                """, (sport,))
             for line in c.fetchall():
                 if re.match(reg_exp, line[1]):
                     results.append(line)
@@ -511,12 +511,12 @@ def get_close_name4(name, sport, site, only_null=True):
             continue
         if only_null:
             c.execute("""
-            SELECT id, name FROM names WHERE sport='{}' AND name_{}="{}" AND name_{} IS NULL
-            """.format(sport, bookmaker, name, site))
+            SELECT id, name FROM names WHERE sport = ? AND name_{} = ? AND name_{} IS NULL
+            """.format(bookmaker, site), (sport, name))
         else:
             c.execute("""
-            SELECT id, name FROM names WHERE sport='{}' AND name_{}="{}"
-            """.format(sport, bookmaker, name))
+            SELECT id, name FROM names WHERE sport = ? AND name_{} = ?
+            """.format(bookmaker), (sport, name))
         for line in c.fetchall():
             results.add(line)
     return list(results)
@@ -529,8 +529,8 @@ def get_id_by_site(name, sport, site):
     conn = sqlite3.connect(sb.PATH_DB)
     c = conn.cursor()
     c.execute("""
-    SELECT id FROM names WHERE name_{}="{}" AND sport='{}'
-    """.format(site, name, sport))
+    SELECT id FROM names WHERE name_{} = ? AND sport = ?
+    """.format(site), (name, sport))
     _id = c.fetchone()
     if _id:
         return _id[0]
@@ -645,8 +645,8 @@ def get_category(id_team):
     conn = sqlite3.connect(sb.PATH_DB)
     c = conn.cursor()
     c.execute("""
-    SELECT category FROM names WHERE id={}
-    """.format(id_team))
+    SELECT category FROM names WHERE id = ?
+    """, (id_team,))
     category = c.fetchone()
     if category:
         return category[0]
@@ -721,11 +721,11 @@ def get_double_team_tennis(team, sport, site, only_null=False):
         c = conn.cursor()
         if only_null:
             c.execute("""
-            SELECT id, name FROM names WHERE sport='tennis' AND name LIKE '% & %' AND name_{} IS NULL
+            SELECT id, name FROM names WHERE sport = 'tennis' AND name LIKE '% & %' AND name_{} IS NULL
             """.format(site))
         else:
             c.execute("""
-            SELECT id, name FROM names WHERE sport='tennis' AND name LIKE '% & %'
+            SELECT id, name FROM names WHERE sport = 'tennis' AND name LIKE '% & %'
             """)
         for line in c.fetchall():
             compared_players = unidecode.unidecode(line[1]).lower().split(" & ")
@@ -741,8 +741,8 @@ def get_all_competitions(sport):
     conn = sqlite3.connect(sb.PATH_DB)
     c = conn.cursor()
     c.execute("""
-    SELECT competition FROM competitions WHERE sport='{0}' AND competition<>'Tout le {0}'
-    """.format(sport))
+    SELECT competition FROM competitions WHERE sport = ? AND competition <> ?
+    """, (sport, "Tout le " + sport))
     return ["Tout le "+sport]+sorted(list(map(lambda x: x[0], c.fetchall())))
 
 
@@ -765,8 +765,8 @@ def get_competition_name_by_id(_id):
     conn = sqlite3.connect(sb.PATH_DB)
     c = conn.cursor()
     c.execute("""
-    SELECT competition FROM competitions WHERE id='{}'
-    """.format(_id))
+    SELECT competition FROM competitions WHERE id = ?
+    """, (_id,))
     try:
         return c.fetchone()[0]
     except TypeError:
@@ -792,8 +792,8 @@ def get_all_current_competitions(sport):
                         c = conn.cursor()
                         c.execute("""
                         INSERT INTO competitions (id, sport, competition)
-                        VALUES ({}, "{}", "{}")
-                        """.format(id_league, sport, league_name))
+                        VALUES (?, ?, ?)
+                        """, (id_league, sport, league_name))
                         conn.commit()
                         c.close()
                         leagues.append(league_name)
@@ -832,8 +832,8 @@ def get_main_competitions(sport):
                                 c = conn.cursor()
                                 c.execute("""
                                 INSERT INTO competitions (id, sport, competition)
-                                VALUES ({}, "{}", "{}")
-                                """.format(id_league, sport, league_name))
+                                VALUES (?, ?, ?)
+                                """, (id_league, sport, league_name))
                                 conn.commit()
                                 c.close()
                                 leagues.append(league_name)
@@ -848,8 +848,8 @@ def get_all_names_from_id(_id):
     conn = sqlite3.connect(sb.PATH_DB)
     c = conn.cursor()
     c.execute("""
-    SELECT * FROM names WHERE id="{}"
-    """.format(_id))
+    SELECT * FROM names WHERE id = ?
+    """, (_id,))
     results = c.fetchall()
     sport, name = results[0][1:3]
     names_site = set(item for sublist in results for item in sublist[3:] if item)
@@ -863,8 +863,8 @@ def add_id_to_new_db(_id):
         c = conn.cursor()
         c.execute("""
         INSERT INTO names_v2 (id, sport, name, name_site)
-        VALUES ({}, "{}", "{}", "{}")
-        """.format(_id, sport, name, name_site))
+        VALUES (?, ?, ?, ?)
+        """, (_id, sport, name, name_site))
     conn.commit()
 
 def get_all_ids():
@@ -885,8 +885,8 @@ def is_id_consistent(_id):
     conn = sqlite3.connect(sb.PATH_DB)
     c = conn.cursor()
     c.execute("""
-    select * from names where id={} order by _rowid_
-    """.format(_id))
+    SELECT * FROM names WHERE id = ? ORDER BY _rowid_
+    """, (_id,))
     results = c.fetchall()
     n = len(results)
     list_sites = sb.DB_BOOKMAKERS
@@ -918,8 +918,8 @@ def is_player_in_db(player):
     conn = sqlite3.connect(sb.PATH_DB)
     c = conn.cursor()
     c.execute("""
-    SELECT name FROM players WHERE name="{}"
-    """.format(player))
+    SELECT name FROM players WHERE name = ?
+    """, (player,))
     if c.fetchall():
         return True
     return False
@@ -928,8 +928,8 @@ def is_player_added_in_db(player, site):
     conn = sqlite3.connect(sb.PATH_DB)
     c = conn.cursor()
     c.execute("""
-    SELECT name FROM players WHERE name_{}="{}"
-    """.format(site, player))
+    SELECT name FROM players WHERE name_{} = ?
+    """.format(site), (player,))
     ref_player = c.fetchone()
     if ref_player:
         return ref_player[0]
@@ -940,15 +940,15 @@ def add_player_to_db(player, site):
     c = conn.cursor()
     c.execute("""
     UPDATE players
-    SET name_{0} = "{1}"
+    SET name_{0} = ?
     WHERE _rowid_ = (
         SELECT _rowid_
         FROM players
-        WHERE name = "{1}"
+        WHERE name = ?
         ORDER BY _rowid_
         LIMIT 1
     )
-    """.format(site, player))
+    """.format(site), (player, player))
     c.close()
     conn.commit()
 
@@ -987,15 +987,15 @@ def add_close_player_to_db(player, site):
     c = conn.cursor()
     c.execute("""
     UPDATE players
-    SET name_{} = "{}"
+    SET name_{} = ?
     WHERE _rowid_ = (
         SELECT _rowid_
         FROM players
-        WHERE name = "{}"
+        WHERE name = ?
         ORDER BY _rowid_
         LIMIT 1
     )
-    """.format(site, player, player_ref))
+    """.format(site), (player, player_ref))
     c.close()
     conn.commit()
     return player_ref
@@ -1005,8 +1005,8 @@ def add_new_player_to_db(player):
     c = conn.cursor()
     c.execute("""
     INSERT INTO players (name)
-    VALUES ("{}")
-    """.format(player))
+    VALUES (?)
+    """, (player,))
     conn.commit()
     c.close()
     

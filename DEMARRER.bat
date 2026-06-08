@@ -1,19 +1,19 @@
 @echo off
-title SportsBetting API
+title SportsBetting API - LITE
 echo ================================================
-echo   SportsBetting Dashboard - Serveur API
+echo   SportsBetting Dashboard - Serveur API LITE
 echo ================================================
 echo.
-
-REM Installe les dependances si necessaire
+echo Installation des dependances...
 pip install flask flask-cors requests -q
 
+echo.
 echo Demarrage de l'API sur http://localhost:5000
 echo (Appuyez sur Ctrl+C pour arreter)
 echo.
 
-REM Lance depuis le dossier racine du projet
-cd /d "%~dp0.."
-python api/server_lite.py
+python "%~dp0api\server_lite.py"
 
+echo.
+echo Le serveur s'est arrete.
 pause
