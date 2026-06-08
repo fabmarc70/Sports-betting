@@ -77,30 +77,50 @@
     .arb-gain{color:var(--accent2);font-weight:700;}
 
     /* Modal calculateur */
-    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center;padding:16px;}
     .modal-overlay.open{display:flex;}
-    .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
-    .modal-title{font-size:1.1rem;font-weight:700;margin-bottom:4px;}
-    .modal-sub{color:var(--muted);font-size:.82rem;margin-bottom:20px;}
-    .stake-input-row{display:flex;align-items:center;gap:10px;margin-bottom:22px;}
-    .stake-input-row label{color:var(--muted);font-size:.85rem;white-space:nowrap;}
-    .stake-input-row input{background:var(--surface2);border:2px solid var(--accent);color:var(--text);padding:10px 14px;border-radius:10px;font-size:1.1rem;font-weight:700;width:130px;outline:none;text-align:center;}
-    .stake-input-row input:focus{border-color:var(--accent2);}
-    .calc-table{width:100%;border-collapse:collapse;margin-bottom:18px;}
-    .calc-table th{text-align:left;padding:8px 10px;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);}
-    .calc-table td{padding:10px 10px;border-bottom:1px solid var(--border);font-size:.9rem;}
-    .calc-table tr:last-child td{border-bottom:none;}
-    .outcome-name{font-weight:600;}
-    .bm-name{color:var(--muted);font-size:.8rem;}
-    .stake-amt{font-weight:700;color:var(--accent);font-size:1rem;}
-    .return-amt{color:var(--accent2);font-weight:600;}
-    .profit-box{background:#1a3a2a;border:1px solid var(--accent2);border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
-    .profit-box .label{color:var(--accent2);font-size:.82rem;font-weight:600;}
-    .profit-box .value{color:var(--accent2);font-size:1.4rem;font-weight:800;}
-    .modal-close{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 20px;border-radius:8px;cursor:pointer;font-size:.85rem;}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:0;width:100%;max-width:620px;max-height:92vh;overflow-y:auto;}
+    .modal-header{padding:22px 26px 16px;border-bottom:1px solid var(--border);}
+    .modal-match{font-size:1.15rem;font-weight:700;margin-bottom:3px;}
+    .modal-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+    .modal-meta span{font-size:.78rem;color:var(--muted);}
+    .modal-meta .trj-badge{background:#0a1a3a;color:var(--accent);border:1px solid var(--accent);border-radius:6px;padding:2px 8px;font-weight:700;}
+    .modal-meta .date-badge{color:var(--warn);}
+    .warning-bar{background:#2a1a0a;border-left:3px solid var(--warn);padding:10px 16px;font-size:.8rem;color:var(--warn);display:flex;align-items:center;gap:8px;}
+    .modal-body{padding:20px 26px;}
+    .stake-row{display:flex;align-items:center;gap:12px;margin-bottom:24px;background:var(--surface2);border-radius:10px;padding:14px 16px;}
+    .stake-row label{color:var(--text);font-size:.9rem;font-weight:600;flex:1;}
+    .stake-row input{background:var(--bg);border:2px solid var(--accent2);color:var(--accent2);padding:8px 14px;border-radius:8px;font-size:1.2rem;font-weight:800;width:110px;outline:none;text-align:center;}
+    .stake-row .currency{color:var(--accent2);font-size:1.1rem;font-weight:700;}
+    .steps-title{font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:12px;}
+    .step-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;}
+    .step-card:last-of-type{margin-bottom:0;}
+    .step-num{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:.72rem;font-weight:800;margin-right:8px;}
+    .step-bm{font-size:1rem;font-weight:700;display:flex;align-items:center;gap:6px;margin-bottom:10px;}
+    .step-bm a{color:var(--accent);font-size:.78rem;font-weight:400;}
+    .step-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+    .step-field{background:var(--bg);border-radius:8px;padding:10px 12px;}
+    .step-field .sf-label{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+    .step-field .sf-value{font-size:.95rem;font-weight:700;}
+    .sf-outcome{color:var(--text);}
+    .sf-odd{color:var(--accent);}
+    .sf-stake{color:var(--accent2);font-size:1.1rem;}
+    .step-return{margin-top:8px;font-size:.8rem;color:var(--muted);text-align:right;}
+    .step-return strong{color:var(--accent2);}
+    .summary-box{background:#0d2010;border:1px solid var(--accent2);border-radius:12px;padding:16px 20px;margin-top:18px;}
+    .summary-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent2);margin-bottom:12px;}
+    .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+    .sum-item .si-label{font-size:.72rem;color:var(--muted);margin-bottom:2px;}
+    .sum-item .si-value{font-size:1rem;font-weight:700;}
+    .profit-highlight{background:var(--accent2);color:#0f1117;border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;}
+    .profit-highlight .ph-label{font-size:.85rem;font-weight:700;}
+    .profit-highlight .ph-value{font-size:1.5rem;font-weight:900;}
+    .modal-footer{padding:16px 26px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;}
+    .modal-close{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 24px;border-radius:8px;cursor:pointer;font-size:.88rem;font-weight:600;}
     .modal-close:hover{background:var(--border);}
     .clickable-row{cursor:pointer;}
     .clickable-row:hover td{background:var(--surface2) !important;}
+    .calc-hint{font-size:.72rem;color:var(--accent);margin-top:2px;}
 
     /* Bar chart */
     .bar-chart{display:flex;flex-direction:column;gap:10px;}
@@ -219,21 +239,40 @@
 <!-- Modal calculateur de mise -->
 <div class="modal-overlay" id="calc-modal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
-    <div class="modal-title" id="calc-match">—</div>
-    <div class="modal-sub" id="calc-sport">—</div>
-    <div class="stake-input-row">
-      <label>Mise totale à répartir :</label>
-      <input type="number" id="calc-stake" value="100" min="1" oninput="updateCalc()"> €
+    <div class="modal-header">
+      <div class="modal-match" id="calc-match">—</div>
+      <div class="modal-meta">
+        <span id="calc-sport-badge">—</span>
+        <span class="trj-badge" id="calc-trj-badge">TRJ —%</span>
+        <span class="date-badge" id="calc-date-badge"></span>
+      </div>
     </div>
-    <table class="calc-table">
-      <thead><tr><th>Issue</th><th>Bookmaker</th><th>Cote</th><th>Mise exacte</th><th>Retour si gagne</th></tr></thead>
-      <tbody id="calc-tbody"></tbody>
-    </table>
-    <div class="profit-box">
-      <div><div class="label">Profit garanti quel que soit le résultat</div><div style="color:var(--muted);font-size:.75rem;margin-top:2px">Retour minimum − Mise totale</div></div>
-      <div class="value" id="calc-profit">—</div>
+    <div class="warning-bar">⚡ Agissez vite — les cotes peuvent changer en 2 à 3 minutes. Placez tous les paris dans l'ordre avant que les cotes ne bougent.</div>
+    <div class="modal-body">
+      <div class="stake-row">
+        <label>Montant total à miser (réparti automatiquement)</label>
+        <input type="number" id="calc-stake" value="100" min="1" oninput="updateCalc()">
+        <span class="currency">€</span>
+      </div>
+      <div class="steps-title">Instructions étape par étape</div>
+      <div id="calc-steps"></div>
+      <div class="summary-box">
+        <div class="summary-title">Récapitulatif</div>
+        <div class="summary-grid">
+          <div class="sum-item"><div class="si-label">Mise totale engagée</div><div class="si-value" id="sum-total">—</div></div>
+          <div class="sum-item"><div class="si-label">Retour garanti minimum</div><div class="si-value" id="sum-return">—</div></div>
+          <div class="sum-item"><div class="si-label">Nombre de bookmakers</div><div class="si-value" id="sum-bms">—</div></div>
+          <div class="sum-item"><div class="si-label">ROI sur cette opération</div><div class="si-value" id="sum-roi">—</div></div>
+        </div>
+        <div class="profit-highlight">
+          <div class="ph-label">Profit garanti quel que soit le résultat</div>
+          <div class="ph-value" id="calc-profit">—</div>
+        </div>
+      </div>
     </div>
-    <button class="modal-close" onclick="closeModal()">Fermer</button>
+    <div class="modal-footer">
+      <button class="modal-close" onclick="closeModal()">Fermer</button>
+    </div>
   </div>
 </div>
 
@@ -288,10 +327,33 @@ function renderArbitrages(arbs){
 // ── Calculateur de mise ──
 let _currentArb = null;
 
+// URLs connues des principaux bookmakers
+const BM_URLS = {
+  betfair_ex_eu: 'betfair.com', betfair: 'betfair.com',
+  gtbets: 'gtbets.eu', onexbet: '1xbet.com',
+  tipico_de: 'tipico.com', coolbet: 'coolbet.com',
+  betonlineag: 'betonline.ag', unibet_nl: 'unibet.com',
+  unibet_fr: 'unibet.fr', betclic: 'betclic.com',
+  winamax: 'winamax.fr', pmu_fr: 'pmu.fr',
+  bwin: 'bwin.com', pinnacle: 'pinnacle.com',
+  zebet: 'zebet.fr', betsson: 'betsson.com',
+  leovegas_se: 'leovegas.com', everygame: 'everygame.eu',
+  marathonbet: 'marathonbet.com', parionssport: 'enligne.parionssport.fdj.fr',
+};
+
+// Marché selon le sport
+const MARKET_LABEL = {
+  football: 'Résultat du match (1X2)', basketball: 'Vainqueur du match',
+  tennis: 'Vainqueur du match', rugby: 'Résultat du match',
+};
+
 function openCalc(idx){
   _currentArb = _arbData[idx];
   document.getElementById('calc-match').textContent = _currentArb.match;
-  document.getElementById('calc-sport').textContent = _currentArb.sport + ' · TRJ ' + _currentArb.trj + '%';
+  document.getElementById('calc-sport-badge').textContent = _currentArb.sport + ' · ' + (MARKET_LABEL[_currentArb.sport] || 'Résultat');
+  document.getElementById('calc-trj-badge').textContent = 'TRJ ' + _currentArb.trj + '%';
+  const d = _currentArb.date ? new Date(_currentArb.date) : null;
+  document.getElementById('calc-date-badge').textContent = d ? '⏰ Match le ' + d.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
   document.getElementById('calc-stake').value = 100;
   updateCalc();
   document.getElementById('calc-modal').classList.add('open');
@@ -305,26 +367,62 @@ function updateCalc(){
   if(!_currentArb) return;
   const total = parseFloat(document.getElementById('calc-stake').value) || 100;
   const bd = _currentArb.breakdown || [];
-  const tb = document.getElementById('calc-tbody');
+  const stepsEl = document.getElementById('calc-steps');
+
   if(!bd.length){
-    tb.innerHTML='<tr><td colspan="5" style="color:var(--muted)">Données insuffisantes</td></tr>';
+    stepsEl.innerHTML='<div style="color:var(--muted);padding:16px">Rechargez les données — le serveur doit être relancé pour inclure le détail des mises.</div>';
     return;
   }
+
   let minReturn = Infinity;
-  tb.innerHTML = bd.map(row => {
-    const stake = Math.round(total * row.stake_pct) / 100;
-    const ret = Math.round(stake * row.odd * 100) / 100;
+  const steps = bd.map((row, i) => {
+    const stake = (total * row.stake_pct / 100);
+    const ret = stake * row.odd;
     if(ret < minReturn) minReturn = ret;
-    return `<tr>
-      <td><div class="outcome-name">${row.outcome}</div></td>
-      <td><span class="bm-name">${row.bookmaker}</span></td>
-      <td><strong>${row.odd}</strong></td>
-      <td><span class="stake-amt">€${stake.toFixed(2)}</span></td>
-      <td><span class="return-amt">€${ret.toFixed(2)}</span></td>
-    </tr>`;
-  }).join('');
-  const profit = minReturn === Infinity ? 0 : (minReturn - total);
+    const bmUrl = BM_URLS[row.bookmaker] || (row.bookmaker + '.com');
+    const market = MARKET_LABEL[_currentArb.sport] || 'Résultat du match';
+    return `<div class="step-card">
+      <div class="step-bm">
+        <span class="step-num">${i+1}</span>
+        <span>${row.bookmaker.replace(/_fr|_nl|_se|_eu|_de/g,'').replace('betfair_ex','betfair')}</span>
+        <a href="https://${bmUrl}" target="_blank" rel="noopener">🔗 ${bmUrl}</a>
+      </div>
+      <div class="step-grid">
+        <div class="step-field">
+          <div class="sf-label">Marché à sélectionner</div>
+          <div class="sf-value sf-outcome" style="font-size:.82rem">${market}</div>
+        </div>
+        <div class="step-field">
+          <div class="sf-label">Pariez sur</div>
+          <div class="sf-value sf-outcome">${row.outcome}</div>
+        </div>
+        <div class="step-field">
+          <div class="sf-label">Cote à vérifier</div>
+          <div class="sf-value sf-odd">${row.odd}</div>
+        </div>
+      </div>
+      <div class="step-grid" style="margin-top:8px">
+        <div class="step-field" style="grid-column:1/2">
+          <div class="sf-label">Montant à miser</div>
+          <div class="sf-value sf-stake">€${stake.toFixed(2)}</div>
+        </div>
+        <div class="step-field" style="grid-column:2/4">
+          <div class="sf-label">Retour si "${row.outcome}" gagne</div>
+          <div class="sf-value" style="color:var(--accent2)">€${ret.toFixed(2)} (mise + gain)</div>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  stepsEl.innerHTML = steps.join('');
+
+  const profit = minReturn - total;
+  const roi = (profit / total * 100).toFixed(2);
   document.getElementById('calc-profit').textContent = (profit >= 0 ? '+' : '') + '€' + profit.toFixed(2);
+  document.getElementById('sum-total').textContent = '€' + total.toFixed(2);
+  document.getElementById('sum-return').textContent = '€' + minReturn.toFixed(2);
+  document.getElementById('sum-bms').textContent = bd.length + ' bookmaker' + (bd.length > 1 ? 's' : '');
+  document.getElementById('sum-roi').textContent = (profit >= 0 ? '+' : '') + roi + '%';
 }
 
 function renderFreebets(fbs){
