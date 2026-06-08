@@ -4,175 +4,95 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SportsBetting Dashboard</title>
-  <meta name="description" content="Tableau de bord arbitrage et freebets" />
   <meta name="theme-color" content="#0f1117" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="SBDashboard" />
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icon-192.png" />
-  <!-- Inline SVG icon as data URI for apple-touch-icon fallback -->
-  <style>
-    /* PWA splash */
-    @media (display-mode: standalone) { body { padding-top: env(safe-area-inset-top); } }
-  </style>
   <style>
     :root {
-      --bg: #0f1117;
-      --surface: #1a1d27;
-      --surface2: #242838;
-      --accent: #4f8ef7;
-      --accent2: #34d399;
-      --warn: #f59e0b;
-      --danger: #ef4444;
-      --text: #e2e8f0;
-      --muted: #64748b;
-      --border: #2d3748;
+      --bg:#0f1117; --surface:#1a1d27; --surface2:#242838;
+      --accent:#4f8ef7; --accent2:#34d399; --warn:#f59e0b;
+      --danger:#ef4444; --text:#e2e8f0; --muted:#64748b; --border:#2d3748;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;}
 
-    /* ── Header ── */
-    header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 18px 32px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    header .logo { font-size: 1.5rem; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; }
-    header .subtitle { color: var(--muted); font-size: 0.85rem; }
-    header .badge {
-      margin-left: auto;
-      background: #1a3a2a;
-      color: var(--accent2);
-      border: 1px solid var(--accent2);
-      padding: 4px 12px;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
+    /* Header */
+    header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+    header .logo{font-size:1.4rem;font-weight:700;color:var(--accent);}
+    header .subtitle{color:var(--muted);font-size:0.85rem;}
+    .status-pill{margin-left:auto;padding:4px 14px;border-radius:999px;font-size:0.75rem;font-weight:600;border:1px solid;}
+    .status-pill.online{background:#1a3a2a;color:var(--accent2);border-color:var(--accent2);}
+    .status-pill.offline{background:#3a1a1a;color:var(--danger);border-color:var(--danger);}
+    .status-pill.demo{background:#3a2a0a;color:var(--warn);border-color:var(--warn);}
 
-    /* ── Layout ── */
-    main { max-width: 1400px; margin: 0 auto; padding: 32px; }
+    /* API Config banner */
+    #api-banner{background:#1a2a1a;border-bottom:2px solid var(--accent2);padding:12px 32px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+    #api-banner label{color:var(--accent2);font-size:0.85rem;font-weight:600;white-space:nowrap;}
+    #api-input{flex:1;min-width:280px;background:var(--surface2);border:1px solid var(--accent);color:var(--text);padding:8px 14px;border-radius:8px;font-size:0.85rem;outline:none;}
+    #api-input:focus{border-color:var(--accent2);}
+    #api-save{background:var(--accent2);color:#0f1117;border:none;padding:8px 18px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem;white-space:nowrap;}
+    #api-save:hover{opacity:0.85;}
+    #api-hint{color:var(--muted);font-size:0.78rem;width:100%;}
 
-    /* ── KPI Cards ── */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 32px;
-    }
-    .kpi {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-    }
-    .kpi .label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
-    .kpi .value { font-size: 1.8rem; font-weight: 700; }
-    .kpi .delta { font-size: 0.8rem; margin-top: 4px; }
-    .kpi.green .value { color: var(--accent2); }
-    .kpi.blue .value { color: var(--accent); }
-    .kpi.yellow .value { color: var(--warn); }
-    .kpi.red .value { color: var(--danger); }
-    .up { color: var(--accent2); }
-    .down { color: var(--danger); }
+    /* Layout */
+    main{max-width:1400px;margin:0 auto;padding:28px 32px;}
 
-    /* ── Section titles ── */
-    .section-title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    /* KPI */
+    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:28px;}
+    .kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;}
+    .kpi .label{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+    .kpi .value{font-size:1.7rem;font-weight:700;}
+    .kpi .delta{font-size:0.78rem;margin-top:4px;color:var(--muted);}
+    .kpi.green .value{color:var(--accent2);}
+    .kpi.blue .value{color:var(--accent);}
+    .kpi.yellow .value{color:var(--warn);}
 
-    /* ── Two-column layout ── */
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
-    @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+    /* Tabs */
+    .tabs{display:flex;gap:4px;margin-bottom:18px;}
+    .tab{padding:8px 18px;border-radius:8px;cursor:pointer;font-size:0.85rem;font-weight:500;color:var(--muted);border:1px solid transparent;transition:all .15s;}
+    .tab:hover{color:var(--text);background:var(--surface2);}
+    .tab.active{color:var(--accent);border-color:var(--accent);background:#0a1a3a;}
+    .tab-panel{display:none;}
+    .tab-panel.active{display:block;}
 
-    /* ── Card ── */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-    }
+    /* Card */
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:28px;}
+    @media(max-width:900px){.two-col{grid-template-columns:1fr;}}
+    .section-title{font-size:1rem;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+    .section-title::after{content:'';flex:1;height:1px;background:var(--border);}
 
-    /* ── Table ── */
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-    thead th {
-      text-align: left;
-      padding: 10px 12px;
-      color: var(--muted);
-      font-weight: 600;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-bottom: 1px solid var(--border);
-    }
-    tbody tr:hover { background: var(--surface2); }
-    tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
-    .pill {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 0.72rem;
-      font-weight: 600;
-    }
-    .pill.green { background: #1a3a2a; color: var(--accent2); }
-    .pill.yellow { background: #3a2a0a; color: var(--warn); }
-    .pill.blue { background: #0a1a3a; color: var(--accent); }
+    /* Table */
+    .table-wrap{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;font-size:.875rem;}
+    thead th{text-align:left;padding:10px 12px;color:var(--muted);font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);}
+    tbody tr:hover{background:var(--surface2);}
+    tbody td{padding:10px 12px;border-bottom:1px solid var(--border);}
+    .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.72rem;font-weight:600;}
+    .pill.green{background:#1a3a2a;color:var(--accent2);}
+    .pill.yellow{background:#3a2a0a;color:var(--warn);}
+    .pill.blue{background:#0a1a3a;color:var(--accent);}
+    .arb-gain{color:var(--accent2);font-weight:700;}
 
-    /* ── Bar chart (pure CSS) ── */
-    .bar-chart { display: flex; flex-direction: column; gap: 10px; }
-    .bar-row { display: flex; align-items: center; gap: 12px; font-size: 0.82rem; }
-    .bar-row .bar-label { min-width: 90px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .bar-track { flex: 1; background: var(--surface2); border-radius: 4px; height: 16px; overflow: hidden; }
-    .bar-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
-    .bar-row .bar-val { min-width: 48px; text-align: right; font-weight: 600; font-size: 0.8rem; }
+    /* Bar chart */
+    .bar-chart{display:flex;flex-direction:column;gap:10px;}
+    .bar-row{display:flex;align-items:center;gap:10px;font-size:.82rem;}
+    .bar-label{min-width:88px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .bar-track{flex:1;background:var(--surface2);border-radius:4px;height:15px;overflow:hidden;}
+    .bar-fill{height:100%;border-radius:4px;transition:width .8s ease;}
+    .bar-val{min-width:52px;text-align:right;font-weight:600;font-size:.8rem;}
 
-    /* ── Arbitrage table ── */
-    .arb-gain { color: var(--accent2); font-weight: 700; }
+    /* Donut */
+    .donut-wrap{display:flex;align-items:center;gap:22px;}
+    .legend{display:flex;flex-direction:column;gap:8px;}
+    .legend-item{display:flex;align-items:center;gap:8px;font-size:.82rem;}
+    .legend-dot{width:10px;height:10px;border-radius:50%;}
 
-    /* ── Footer ── */
-    footer {
-      text-align: center;
-      padding: 24px;
-      color: var(--muted);
-      font-size: 0.78rem;
-      border-top: 1px solid var(--border);
-      margin-top: 16px;
-    }
+    footer{text-align:center;padding:22px;color:var(--muted);font-size:.77rem;border-top:1px solid var(--border);margin-top:8px;}
 
-    /* ── Tabs ── */
-    .tabs { display: flex; gap: 4px; margin-bottom: 20px; }
-    .tab {
-      padding: 8px 18px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: var(--muted);
-      border: 1px solid transparent;
-      transition: all 0.15s;
-    }
-    .tab:hover { color: var(--text); background: var(--surface2); }
-    .tab.active { color: var(--accent); border-color: var(--accent); background: #0a1a3a; }
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
-
-    /* ── Donut (SVG) ── */
-    .donut-wrap { display: flex; align-items: center; gap: 24px; }
-    .legend { display: flex; flex-direction: column; gap: 8px; }
-    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; }
-    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+    @media(display-mode:standalone){body{padding-top:env(safe-area-inset-top);}}
   </style>
 </head>
 <body>
@@ -182,349 +102,200 @@
     <div class="logo">⚽ SportsBetting</div>
     <div class="subtitle">Tableau de bord – Arbitrage &amp; Freebets</div>
   </div>
-  <div class="badge">● En ligne</div>
+  <span class="status-pill demo" id="status-pill">● Démo</span>
 </header>
 
-<main>
+<!-- Barre de configuration API (toujours visible) -->
+<div id="api-banner">
+  <label>🔗 URL de votre API :</label>
+  <input id="api-input" type="text" placeholder="https://xxxxx.trycloudflare.com" />
+  <button id="api-save" onclick="saveApi()">Connecter</button>
+  <span id="api-hint">Lancez <code>api\server_lite.py</code> puis <code>api\tunnel.bat</code> sur votre PC, et collez l'URL ici.</span>
+</div>
 
-  <!-- KPIs -->
+<main>
   <div class="kpi-grid">
-    <div class="kpi green">
-      <div class="label">Plus-value totale</div>
-      <div class="value" id="kpi-pv">+€342</div>
-      <div class="delta up" id="kpi-pv-d">↑ +12% ce mois</div>
-    </div>
-    <div class="kpi blue">
-      <div class="label">Freebets convertis</div>
-      <div class="value" id="kpi-fb">18</div>
-      <div class="delta up">↑ 3 cette semaine</div>
-    </div>
-    <div class="kpi yellow">
-      <div class="label">Mises en cours</div>
-      <div class="value" id="kpi-mise">€1 240</div>
-      <div class="delta" style="color:var(--muted)">sur 6 bookmakers</div>
-    </div>
-    <div class="kpi blue">
-      <div class="label">Arbitrages trouvés</div>
-      <div class="value" id="kpi-arb">7</div>
-      <div class="delta up">↑ 2 nouveaux</div>
-    </div>
-    <div class="kpi green">
-      <div class="label">TRJ moyen</div>
-      <div class="value" id="kpi-trj">96.4%</div>
-      <div class="delta" style="color:var(--muted)">sur les 30 derniers jours</div>
-    </div>
+    <div class="kpi green"><div class="label">Plus-value potentielle</div><div class="value" id="kpi-pv">—</div><div class="delta" id="kpi-pv-d">pour €100 misés par arbitrage</div></div>
+    <div class="kpi blue"><div class="label">Freebets disponibles</div><div class="value" id="kpi-fb">—</div><div class="delta">bookmakers actifs</div></div>
+    <div class="kpi blue"><div class="label">Arbitrages trouvés</div><div class="value" id="kpi-arb">—</div><div class="delta">en ce moment</div></div>
+    <div class="kpi green"><div class="label">TRJ moyen</div><div class="value" id="kpi-trj">—</div><div class="delta">sur les opportunités actives</div></div>
   </div>
 
-  <!-- Tabs -->
   <div class="tabs">
     <div class="tab active" onclick="switchTab('arb')">Arbitrages</div>
     <div class="tab" onclick="switchTab('freebets')">Freebets</div>
     <div class="tab" onclick="switchTab('stats')">Statistiques</div>
   </div>
 
-  <!-- Tab: Arbitrages -->
   <div class="tab-panel active" id="tab-arb">
-    <div class="card" style="margin-bottom:24px;">
+    <div class="card" style="margin-bottom:22px;">
       <div class="section-title">Meilleures opportunités d'arbitrage</div>
       <div class="table-wrap">
-        <table id="arb-table">
-          <thead>
-            <tr>
-              <th>Match</th>
-              <th>Compétition</th>
-              <th>Sport</th>
-              <th>Bookmakers</th>
-              <th>Cotes</th>
-              <th>Mise</th>
-              <th>Gain garanti</th>
-              <th>TRJ</th>
-              <th>Statut</th>
-            </tr>
-          </thead>
-          <tbody id="arb-tbody"></tbody>
+        <table>
+          <thead><tr><th>Match</th><th>Sport</th><th>Bookmakers</th><th>Cotes</th><th>Gain / €100</th><th>TRJ</th><th>Statut</th></tr></thead>
+          <tbody id="arb-tbody"><tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">Connectez votre API pour voir les données réelles</td></tr></tbody>
         </table>
       </div>
     </div>
-
     <div class="two-col">
-      <div class="card">
-        <div class="section-title">Gain par bookmaker</div>
-        <div class="bar-chart" id="bookmaker-bars"></div>
-      </div>
-      <div class="card">
-        <div class="section-title">Répartition par sport</div>
-        <div class="donut-wrap">
-          <svg width="120" height="120" viewBox="0 0 120 120" id="donut-svg"></svg>
-          <div class="legend" id="donut-legend"></div>
-        </div>
-      </div>
+      <div class="card"><div class="section-title">Gain par bookmaker</div><div class="bar-chart" id="bookmaker-bars"><div style="color:var(--muted);font-size:.85rem">En attente de l'API…</div></div></div>
+      <div class="card"><div class="section-title">Répartition par sport</div><div class="donut-wrap"><svg width="120" height="120" viewBox="0 0 120 120" id="donut-svg"></svg><div class="legend" id="donut-legend"></div></div></div>
     </div>
   </div>
 
-  <!-- Tab: Freebets -->
   <div class="tab-panel" id="tab-freebets">
-    <div class="card" style="margin-bottom:24px;">
-      <div class="section-title">Conversion de freebets actifs</div>
+    <div class="card"><div class="section-title">Taux de conversion freebet par bookmaker</div>
       <div class="table-wrap">
-        <table id="fb-table">
-          <thead>
-            <tr>
-              <th>Site</th>
-              <th>Montant freebet</th>
-              <th>Match cible</th>
-              <th>Mise hedge</th>
-              <th>Retour net estimé</th>
-              <th>Taux conv.</th>
-              <th>Expire le</th>
-            </tr>
-          </thead>
-          <tbody id="fb-tbody"></tbody>
+        <table>
+          <thead><tr><th>Bookmaker</th><th>Sport</th><th>Meilleur match</th><th>Taux conv. estimé</th></tr></thead>
+          <tbody id="fb-tbody"><tr><td colspan="4" style="text-align:center;padding:40px;color:var(--muted)">Connectez votre API pour voir les données réelles</td></tr></tbody>
         </table>
       </div>
     </div>
   </div>
 
-  <!-- Tab: Stats -->
   <div class="tab-panel" id="tab-stats">
     <div class="two-col">
-      <div class="card">
-        <div class="section-title">Évolution de la plus-value (30 jours)</div>
-        <svg id="line-chart" width="100%" height="180" viewBox="0 0 400 180" preserveAspectRatio="none"></svg>
-      </div>
-      <div class="card">
-        <div class="section-title">Taux de succès par bookmaker</div>
-        <div class="bar-chart" id="success-bars"></div>
-      </div>
+      <div class="card"><div class="section-title">Évolution de la plus-value (30 jours)</div><svg id="line-chart" width="100%" height="180" viewBox="0 0 400 180" preserveAspectRatio="none"></svg></div>
+      <div class="card"><div class="section-title">TRJ par bookmaker</div><div class="bar-chart" id="success-bars"><div style="color:var(--muted);font-size:.85rem">En attente de l'API…</div></div></div>
     </div>
   </div>
-
 </main>
 
-<footer id="footer-status">SportsBetting Dashboard · Connexion à l'API en cours...</footer>
+<footer id="footer-status">SportsBetting Dashboard · En attente de connexion API</footer>
 
 <script>
-// ════════════════════════════════════════════════════
-//  CONFIGURATION — collez ici l'URL du tunnel Cloudflare
-//  après avoir lancé api/tunnel.bat
-// ════════════════════════════════════════════════════
-const API_URL = localStorage.getItem('sb_api_url') || null;
+// ── Config ──
+const SPORT_COLORS = {football:'#4f8ef7',tennis:'#34d399',basketball:'#a78bfa',rugby:'#f59e0b',default:'#38bdf8'};
+function sportColor(s){return SPORT_COLORS[s]||SPORT_COLORS.default;}
 
-// ── Tab navigation ──
-function switchTab(id) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  const idx = ['arb','freebets','stats'].indexOf(id);
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  const idx=['arb','freebets','stats'].indexOf(id);
   document.querySelectorAll('.tab')[idx].classList.add('active');
-  document.getElementById('tab-' + id).classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
 }
 
-// ── API URL config dialog ──
-function promptApiUrl() {
-  const url = prompt(
-    'Entrez l\'URL de votre API (ex: https://xxxxx.trycloudflare.com)\n\n' +
-    'Lancez d\'abord api/start.bat puis api/tunnel.bat sur votre PC.',
-    localStorage.getItem('sb_api_url') || ''
-  );
-  if (url) {
-    localStorage.setItem('sb_api_url', url.replace(/\/$/, ''));
-    location.reload();
-  }
+// Charge l'URL sauvegardée
+const savedUrl = localStorage.getItem('sb_api_url');
+if(savedUrl) document.getElementById('api-input').value = savedUrl;
+
+function saveApi(){
+  const url = document.getElementById('api-input').value.trim().replace(/\/$/,'');
+  if(!url){alert('Entrez une URL valide');return;}
+  localStorage.setItem('sb_api_url',url);
+  fetchData();
 }
 
-// ── Charts helpers ──
-function renderBars(elId, items, colorFn, valFn, labelFn) {
-  const el = document.getElementById(elId);
-  if (!el || !items.length) return;
-  const max = Math.max(...items.map(valFn));
-  el.innerHTML = items.map(b => {
-    const pct = Math.round(valFn(b) / max * 100);
-    return `<div class="bar-row">
-      <span class="bar-label">${labelFn(b)}</span>
-      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${colorFn(b)}"></div></div>
-      <span class="bar-val" style="color:${colorFn(b)}">${valFn(b)}</span>
-    </div>`;
-  }).join('');
+// ── Rendu ──
+function renderArbitrages(arbs){
+  const tb=document.getElementById('arb-tbody');
+  if(!arbs.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">Aucun arbitrage détecté</td></tr>';return;}
+  tb.innerHTML=arbs.map(r=>`<tr>
+    <td><strong>${r.match}</strong></td>
+    <td><span class="pill blue">${r.sport}</span></td>
+    <td style="color:var(--muted);font-size:.8rem">${r.bookmakers}</td>
+    <td>${r.cotes}</td>
+    <td class="arb-gain">+€${r.gain_100}</td>
+    <td>${r.trj}%</td>
+    <td><span class="pill green">Live</span></td>
+  </tr>`).join('');
 }
 
-const SPORT_COLORS = { football:'#4f8ef7', tennis:'#34d399', basketball:'#a78bfa', rugby:'#f59e0b', default:'#38bdf8' };
-function sportColor(s) { return SPORT_COLORS[s] || SPORT_COLORS.default; }
+function renderFreebets(fbs){
+  const tb=document.getElementById('fb-tbody');
+  if(!fbs.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:32px;color:var(--muted)">Aucune donnée</td></tr>';return;}
+  tb.innerHTML=fbs.map(r=>`<tr>
+    <td><strong>${r.site}</strong></td>
+    <td><span class="pill blue">${r.sport}</span></td>
+    <td style="color:var(--muted)">${r.match||'—'}</td>
+    <td class="arb-gain">${r.taux}%</td>
+  </tr>`).join('');
+}
 
-function renderDonut(data) {
-  const svg = document.getElementById('donut-svg');
-  const legend = document.getElementById('donut-legend');
-  if (!svg || !data.length) return;
-  const total = data.reduce((s, d) => s + d.count, 0);
-  const cx=60, cy=60, r=48, sw=20;
-  let offset=0;
-  const circ = 2*Math.PI*r;
-  svg.innerHTML=''; legend.innerHTML='';
-  data.forEach(d => {
-    const dash=(d.count/total)*circ;
-    const c=document.createElementNS("http://www.w3.org/2000/svg","circle");
-    c.setAttribute("cx",cx); c.setAttribute("cy",cy); c.setAttribute("r",r);
-    c.setAttribute("fill","none"); c.setAttribute("stroke",d.color);
-    c.setAttribute("stroke-width",sw);
-    c.setAttribute("stroke-dasharray",`${dash} ${circ-dash}`);
-    c.setAttribute("stroke-dashoffset",-offset);
-    c.setAttribute("transform",`rotate(-90 ${cx} ${cy})`);
-    svg.appendChild(c);
-    offset+=dash;
-    legend.innerHTML+=`<div class="legend-item">
-      <div class="legend-dot" style="background:${d.color}"></div>
-      <span>${d.sport} <strong>${d.count}</strong></span></div>`;
+function renderBars(elId,items,colorFn,valFn,labelFn){
+  const el=document.getElementById(elId);
+  if(!el||!items.length){el&&(el.innerHTML='<div style="color:var(--muted);font-size:.85rem">Aucune donnée</div>');return;}
+  const max=Math.max(...items.map(valFn),1);
+  el.innerHTML=items.map(b=>`<div class="bar-row">
+    <span class="bar-label">${labelFn(b)}</span>
+    <div class="bar-track"><div class="bar-fill" style="width:${Math.round(valFn(b)/max*100)}%;background:${colorFn(b)}"></div></div>
+    <span class="bar-val" style="color:${colorFn(b)}">${valFn(b)}</span>
+  </div>`).join('');
+}
+
+function renderDonut(data){
+  const svg=document.getElementById('donut-svg'),leg=document.getElementById('donut-legend');
+  if(!data.length)return;
+  const total=data.reduce((s,d)=>s+d.count,0),cx=60,cy=60,r=48,sw=20,circ=2*Math.PI*r;
+  let offset=0;svg.innerHTML='';leg.innerHTML='';
+  data.forEach(d=>{
+    const dash=(d.count/total)*circ,c=document.createElementNS("http://www.w3.org/2000/svg","circle");
+    c.setAttribute("cx",cx);c.setAttribute("cy",cy);c.setAttribute("r",r);
+    c.setAttribute("fill","none");c.setAttribute("stroke",d.color);c.setAttribute("stroke-width",sw);
+    c.setAttribute("stroke-dasharray",`${dash} ${circ-dash}`);c.setAttribute("stroke-dashoffset",-offset);
+    c.setAttribute("transform",`rotate(-90 ${cx} ${cy})`);svg.appendChild(c);offset+=dash;
+    leg.innerHTML+=`<div class="legend-item"><div class="legend-dot" style="background:${d.color}"></div><span>${d.sport} <strong>${d.count}</strong></span></div>`;
   });
 }
 
-function renderLine(vals) {
-  const svg = document.getElementById('line-chart');
-  if (!svg) return;
-  const W=400, H=160, pad=16;
-  const min=Math.min(...vals), max=Math.max(...vals)||1;
-  const pts=vals.map((v,i)=>{
-    const x=pad+(i/(vals.length-1))*(W-2*pad);
-    const y=H-pad-((v-min)/(max-min))*(H-2*pad);
-    return `${x},${y}`;
-  });
-  const area=`M${pts[0]} L${pts.join(' L')} L${W-pad},${H-pad} L${pad},${H-pad} Z`;
-  const line=`M${pts[0]} L${pts.join(' L')}`;
+function renderLine(vals){
+  const svg=document.getElementById('line-chart');
+  const W=400,H=160,pad=16,min=Math.min(...vals),max=Math.max(...vals)||1;
+  const pts=vals.map((v,i)=>`${pad+(i/(vals.length-1))*(W-2*pad)},${H-pad-((v-min)/(max-min))*(H-2*pad)}`);
   svg.innerHTML=`<defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0%" stop-color="#4f8ef7" stop-opacity="0.3"/>
     <stop offset="100%" stop-color="#4f8ef7" stop-opacity="0"/>
   </linearGradient></defs>
-  <path d="${area}" fill="url(#lg)"/>
-  <path d="${line}" fill="none" stroke="#4f8ef7" stroke-width="2.5" stroke-linejoin="round"/>`;
+  <path d="M${pts[0]} L${pts.join(' L')} L${W-pad},${H-pad} L${pad},${H-pad} Z" fill="url(#lg)"/>
+  <path d="M${pts[0]} L${pts.join(' L')}" fill="none" stroke="#4f8ef7" stroke-width="2.5" stroke-linejoin="round"/>`;
 }
 
-// ── Render avec données réelles ──
-function renderArbitrages(arbs) {
-  const tbody = document.getElementById('arb-tbody');
-  tbody.innerHTML = '';
-  if (!arbs.length) {
-    tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px">Aucun arbitrage détecté pour le moment</td></tr>';
-    return;
-  }
-  arbs.forEach(r => {
-    const tr=document.createElement('tr');
-    const gain100 = r.gain_100 > 0 ? `+€${r.gain_100} / €100 misés` : '-';
-    tr.innerHTML=`
-      <td><strong>${r.match}</strong></td>
-      <td>${r.competition}</td>
-      <td><span class="pill blue">${r.sport}</span></td>
-      <td style="color:var(--muted);font-size:0.8rem">${r.bookmakers}</td>
-      <td>${r.cotes}</td>
-      <td>${r.date}</td>
-      <td class="arb-gain">${gain100}</td>
-      <td>${r.trj}%</td>
-      <td><span class="pill green">Live</span></td>`;
-    tbody.appendChild(tr);
-  });
+function updateKpis(kpis){
+  document.getElementById('kpi-arb').textContent=kpis.nb_arbitrages??'0';
+  document.getElementById('kpi-trj').textContent=kpis.trj_moyen?(kpis.trj_moyen+'%'):'—';
+  document.getElementById('kpi-pv').textContent=kpis.gain_potentiel?('+€'+kpis.gain_potentiel):'—';
+  document.getElementById('kpi-fb').textContent=kpis.nb_freebets??'—';
 }
 
-function renderFreebets(fbs) {
-  const tbody = document.getElementById('fb-tbody');
-  tbody.innerHTML = '';
-  if (!fbs.length) {
-    tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px">Aucune donnée freebet disponible</td></tr>';
-    return;
-  }
-  fbs.forEach(r => {
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td><strong>${r.site}</strong></td>
-      <td style="color:var(--accent)">${r.sport}</td>
-      <td>${r.match}</td>
-      <td>-</td>
-      <td class="arb-gain">~€${Math.round(r.taux)} / €100</td>
-      <td>${r.taux}%</td>
-      <td style="color:var(--muted)">-</td>`;
-    tbody.appendChild(tr);
-  });
-}
+// ── Fetch ──
+async function fetchData(){
+  const url=(localStorage.getItem('sb_api_url')||'').trim();
+  if(!url)return;
+  const pill=document.getElementById('status-pill');
+  const footer=document.getElementById('footer-status');
+  try{
+    const res=await fetch(url+'/api/all',{signal:AbortSignal.timeout(10000)});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const d=await res.json();
 
-function updateKpis(kpis, lastUpdate) {
-  if (!kpis || !Object.keys(kpis).length) return;
-  document.getElementById('kpi-arb').textContent = kpis.nb_arbitrages ?? '-';
-  document.getElementById('kpi-trj').textContent = kpis.trj_moyen ? kpis.trj_moyen+'%' : '-';
-  document.getElementById('kpi-pv').textContent = kpis.gain_potentiel ? '+€'+kpis.gain_potentiel : '-';
-  document.getElementById('kpi-fb').textContent = kpis.nb_freebets ?? '-';
-  const d = lastUpdate ? new Date(lastUpdate) : null;
-  document.getElementById('footer-status').textContent =
-    'SportsBetting Dashboard · ' + (d ? 'Mis à jour à '+d.toLocaleTimeString('fr-FR') : 'En attente...');
-}
+    updateKpis(d.kpis||{});
+    renderArbitrages(d.arbitrages||[]);
+    renderFreebets(d.freebets||[]);
 
-// ── Fallback données démo si pas d'API ──
-function loadDemo() {
-  const arbs=[
-    {match:"PSG – Marseille",competition:"Ligue 1",sport:"football",bookmakers:"Betclic / Winamax",cotes:"2.10 / 2.05",trj:104.2,gain_100:4.2,date:""},
-    {match:"Djokovic – Alcaraz",competition:"Roland-Garros",sport:"tennis",bookmakers:"Unibet / PMU",cotes:"1.90 / 2.20",trj:103.4,gain_100:3.4,date:""},
-  ];
-  renderArbitrages(arbs);
-  const sportCounts={};
-  arbs.forEach(a=>{sportCounts[a.sport]=(sportCounts[a.sport]||0)+1;});
-  renderDonut(Object.entries(sportCounts).map(([s,c])=>({sport:s,count:c,color:sportColor(s)})));
-  renderLine([0,4,8,12,18,22,28,32,38,44,52,58,62,68,78,86,95,100]);
-  document.getElementById('footer-status').textContent =
-    'SportsBetting Dashboard · Mode démo — Configurez l\'API pour des données réelles';
-  document.querySelector('.badge').style.background='#3a1a0a';
-  document.querySelector('.badge').style.color='var(--warn)';
-  document.querySelector('.badge').textContent='● Démo';
-}
+    const sc={};(d.arbitrages||[]).forEach(a=>{sc[a.sport]=(sc[a.sport]||0)+1;});
+    renderDonut(Object.entries(sc).map(([s,c])=>({sport:s,count:c,color:sportColor(s)})));
 
-// ── Fetch API ──
-async function fetchData() {
-  if (!API_URL) { loadDemo(); return; }
-  try {
-    const res = await fetch(API_URL + '/api/all', {signal: AbortSignal.timeout(10000)});
-    if (!res.ok) throw new Error('HTTP '+res.status);
-    const data = await res.json();
-
-    updateKpis(data.kpis, data.last_update);
-    renderArbitrages(data.arbitrages || []);
-    renderFreebets(data.freebets || []);
-
-    // Graphique sports
-    const sportCounts={};
-    (data.arbitrages||[]).forEach(a=>{sportCounts[a.sport]=(sportCounts[a.sport]||0)+1;});
-    renderDonut(Object.entries(sportCounts).map(([s,c])=>({sport:s,count:c,color:sportColor(s)})));
-
-    // Barres bookmakers
-    const bookGains={};
-    (data.arbitrages||[]).forEach(a=>{
-      a.bookmakers.split(' / ').forEach(b=>{bookGains[b]=(bookGains[b]||0)+a.gain_100;});
-    });
-    const booksArr=Object.entries(bookGains).map(([n,g])=>({name:n,gain:Math.round(g)}))
-      .sort((a,b)=>b.gain-a.gain);
-    const bookColors=['#4f8ef7','#34d399','#a78bfa','#f59e0b','#f87171','#38bdf8','#fb923c'];
-    renderBars('bookmaker-bars', booksArr,
-      (_,i)=>bookColors[i%bookColors.length],
-      b=>b.gain > 0 ? '+€'+b.gain : '€0',
-      b=>b.name
-    );
-
+    const bg={};(d.arbitrages||[]).forEach(a=>{a.bookmakers.split(' / ').forEach(b=>{bg[b]=(bg[b]||0)+(a.gain_100||0);});});
+    const bArr=Object.entries(bg).map(([n,g])=>({name:n,gain:Math.round(g)})).sort((a,b)=>b.gain-a.gain);
+    const bc=['#4f8ef7','#34d399','#a78bfa','#f59e0b','#f87171','#38bdf8','#fb923c'];
+    renderBars('bookmaker-bars',bArr,(_,i)=>bc[i%bc.length],b=>b.gain>0?'+€'+b.gain:'€0',b=>b.name);
+    renderBars('success-bars',(d.freebets||[]).slice(0,6),()=>'var(--accent)',b=>b.taux,b=>b.site);
     renderLine([0,4,8,12,18,22,28,32,38,44,52,58,62,68,78,86,95,100]);
 
-    document.querySelector('.badge').textContent='● En ligne';
-    document.querySelector('.badge').style.color='var(--accent2)';
+    pill.className='status-pill online';pill.textContent='● En ligne';
+    const t=d.last_update?new Date(d.last_update).toLocaleTimeString('fr-FR'):'';
+    footer.textContent='SportsBetting Dashboard · Mis à jour à '+t+' · Actualisation dans 60s';
 
-  } catch(e) {
-    console.error('API error:', e);
-    document.getElementById('footer-status').textContent =
-      '⚠ API inaccessible — vérifiez que api/start.bat et api/tunnel.bat tournent sur votre PC';
-    document.querySelector('.badge').textContent='● Hors ligne';
-    document.querySelector('.badge').style.color='var(--danger)';
-    loadDemo();
+  }catch(e){
+    pill.className='status-pill offline';pill.textContent='● Hors ligne';
+    footer.textContent='⚠ API inaccessible ('+e.message+') — vérifiez que server_lite.py et tunnel.bat tournent sur votre PC';
   }
 }
 
-// ── Bouton config API ──
-document.querySelector('.badge').style.cursor='pointer';
-document.querySelector('.badge').title='Cliquez pour configurer l\'URL de l\'API';
-document.querySelector('.badge').addEventListener('click', promptApiUrl);
-
-// ── Init ──
 fetchData();
-setInterval(fetchData, 60000); // Rafraîchit toutes les 60 secondes
+setInterval(fetchData,60000);
 </script>
 </body>
 </html>
