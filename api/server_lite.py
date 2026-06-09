@@ -187,27 +187,37 @@ def check_api_key():
 
 
 def fetch_odds(sport_key):
-    """Récupère les cotes depuis The Odds API pour un sport donné."""
+    """
+    Récupère les cotes pour un sport.
+    Marchés : h2h + spreads + totals en un seul appel (coût = 3 req mais 3x plus de données).
+    Filtre : seulement les 7 prochains jours → élimine les matchs lointains non actionnables.
+    """
     url = f"{ODDS_API_BASE}/sports/{sport_key}/odds/"
+    now   = datetime.datetime.utcnow()
+    in7d  = now + datetime.timedelta(days=7)
     params = {
-        "apiKey": ODDS_API_KEY,
-        "regions": "eu,uk,us,au",
-        "markets": "h2h",
-        "oddsFormat": "decimal",
+        "apiKey":            ODDS_API_KEY,
+        "regions":           "eu,uk,us,au",
+        "markets":           "h2h,spreads,totals",   # 3 marchés en 1 appel
+        "oddsFormat":        "decimal",
+        "dateFormat":        "iso",
+        "commenceTimeFrom":  now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "commenceTimeTo":    in7d.strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
     try:
         r = requests.get(url, params=params, timeout=15)
-        remaining = r.headers.get("x-requests-remaining", "?")
+        remaining  = r.headers.get("x-requests-remaining", "?")
+        used_last  = r.headers.get("x-requests-last", "?")  # coût réel de cet appel
         if r.status_code == 200:
             data = r.json()
+            if isinstance(data, list):
+                print(f"    → {len(data)} événements | coût appel: {used_last} req | restant: {remaining}")
             return (data if isinstance(data, list) else []), remaining
         if r.status_code == 401:
-            # Sport non disponible sur ce plan → mémorisé, ne sera plus jamais re-requêté
             print(f"    → {sport_key} bloqué (401), mémorisé")
             save_blocked_sport(sport_key)
             return [], remaining
         if r.status_code == 422:
-            # Sport inexistant ou hors saison
             return [], remaining
         if r.status_code == 429:
             print("  Quota API épuisé pour ce mois.")
@@ -220,25 +230,55 @@ def fetch_odds(sport_key):
 
 
 def parse_matches(events, sport_name):
+    """
+    Parse les événements pour les 3 marchés (h2h, spreads, totals).
+    Chaque marché génère une entrée de match indépendante avec ses propres cotes
+    → triples les opportunités d'arbitrage à détecter.
+    """
     matches = []
     for ev in events:
         home = ev.get("home_team", "?")
         away = ev.get("away_team", "?")
-        odds_by_book = {}
+        date = ev.get("commence_time", "")
+
+        # Regroupe les cotes par marché
+        markets_data = {}  # {market_key: {bookmaker: {outcome: price}}}
         for bm in ev.get("bookmakers", []):
-            key = bm.get("key", "")
+            bm_key = bm.get("key", "")
             for market in bm.get("markets", []):
-                if market.get("key") != "h2h":
-                    continue
+                mkey     = market.get("key", "")
                 outcomes = market.get("outcomes", [])
-                if outcomes:
-                    odds_by_book[key] = {o["name"]: o["price"] for o in outcomes}
-        if len(odds_by_book) >= 2:
+                if not outcomes:
+                    continue
+                if mkey not in markets_data:
+                    markets_data[mkey] = {}
+                if mkey == "totals":
+                    # Pour totals : "Over X" / "Under X" — on garde le point le plus fréquent
+                    point = outcomes[0].get("point", "")
+                    label = f"O/U {point}" if point else "Over/Under"
+                    markets_data[mkey][bm_key] = {
+                        f"{o['name']} {o.get('point','')}".strip(): o["price"]
+                        for o in outcomes
+                    }
+                elif mkey == "spreads":
+                    markets_data[mkey][bm_key] = {
+                        f"{o['name']} {o.get('point','')}".strip(): o["price"]
+                        for o in outcomes
+                    }
+                else:  # h2h
+                    markets_data[mkey][bm_key] = {o["name"]: o["price"] for o in outcomes}
+
+        # Crée une entrée de match par marché disponible
+        market_labels = {"h2h": "1X2", "spreads": "Handicap", "totals": "O/U"}
+        for mkey, bm_dict in markets_data.items():
+            if len(bm_dict) < 2:
+                continue
             matches.append({
-                "match": f"{home} vs {away}",
-                "sport": sport_name,
-                "date": ev.get("commence_time", ""),
-                "odds_full": odds_by_book,
+                "match":  f"{home} vs {away}",
+                "sport":  sport_name,
+                "date":   date,
+                "market": market_labels.get(mkey, mkey),
+                "odds_full": bm_dict,
             })
     return matches
 
@@ -306,6 +346,7 @@ def find_arbitrages(matches, min_ratio=MIN_TRJ_RATIO):
             "trj":         trj,
             "gain_100":    gain_100,
             "date":        m.get("date", ""),
+            "market":      m.get("market", "1X2"),
             # "arb" = gain garanti, "near_arb" = value / presque arb
             "status":      "arb" if is_arb else "near_arb",
             "breakdown":   breakdown,

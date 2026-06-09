@@ -1066,7 +1066,7 @@ function renderArbCards(arbs){
     return `<div class="match-card" onclick="openCalc(${realIdx})">
       <div class="match-card-header">
         <div class="competition-tag">${sportIcon(r.sport)} ${sportFr(r.sport)}${dateStr?' · '+dateStr:''}</div>
-        <span class="sport-badge ${sportClass}">${MARKET_LABEL[r.sport]||'1X2'}</span>
+        <span class="sport-badge ${sportClass}">${r.market||'1X2'}</span>
       </div>
       <div class="match-teams">
         <div class="team-name">${t1}</div>
