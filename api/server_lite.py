@@ -158,35 +158,46 @@ def get_active_sport_keys():
         return None
 
 
+def check_api_key():
+    """Vérifie que la clé API est valide via /sports (coût : 0 requête de quota)."""
+    url = f"{ODDS_API_BASE}/sports/"
+    try:
+        r = requests.get(url, params={"apiKey": ODDS_API_KEY}, timeout=10)
+        return r.status_code == 200
+    except Exception:
+        return False
+
+
 def fetch_odds(sport_key):
     """Récupère les cotes depuis The Odds API pour un sport donné."""
     url = f"{ODDS_API_BASE}/sports/{sport_key}/odds/"
     params = {
         "apiKey": ODDS_API_KEY,
-        # "regions" fonctionne sur tous les plans (gratuit inclus).
-        # "bookmakers" nécessite un plan payant → 401 sur le plan gratuit.
         "regions": "eu,uk,us,au",
         "markets": "h2h",
         "oddsFormat": "decimal",
     }
     try:
         r = requests.get(url, params=params, timeout=15)
-        if r.status_code == 401:
-            print("  ERREUR: Clé API invalide.")
-            return None, "invalid_key"
-        if r.status_code == 422:
-            return [], "ok"
-        if r.status_code == 429:
-            print("  Quota API épuisé.")
-            return None, "quota"
         remaining = r.headers.get("x-requests-remaining", "?")
-        data = r.json()
-        if not isinstance(data, list):
+        if r.status_code == 200:
+            data = r.json()
+            return (data if isinstance(data, list) else []), remaining
+        if r.status_code == 401:
+            # Certains sports nécessitent un plan payant → on passe au suivant
+            print(f"    → {sport_key} non disponible sur ce plan (401), ignoré")
             return [], remaining
-        return data, remaining
+        if r.status_code == 422:
+            # Sport inexistant ou hors saison
+            return [], remaining
+        if r.status_code == 429:
+            print("  Quota API épuisé pour ce mois.")
+            return None, "quota"
+        print(f"    → Erreur HTTP {r.status_code} pour {sport_key}")
+        return [], remaining
     except Exception as e:
         print(f"  Erreur réseau {sport_key}: {e}")
-        return None, "error"
+        return [], "error"
 
 
 def parse_matches(events, sport_name):
@@ -300,15 +311,24 @@ def refresh_loop():
                 CACHE["status"] = "refreshing"
                 CACHE["api_key_configured"] = True
 
-            # Étape 1 : quels sports ont des matchs actifs ? (1 requête économisée si beaucoup d'inactifs)
+            # Étape 1 : validation de la clé via /sports (gratuit, hors quota)
+            print("  Vérification de la clé API...")
+            if not check_api_key():
+                print("  ERREUR FATALE: Clé API invalide. Vérifiez ODDS_API_KEY dans server_lite.py")
+                with LOCK:
+                    CACHE["status"] = "invalid_key"
+                time.sleep(60)
+                continue
+
+            # Étape 2 : quels sports ont des matchs actifs ?
             print("  Récupération des sports actifs...")
             active_keys = get_active_sport_keys()
             if active_keys is not None:
                 print(f"  → {len(active_keys)} sports actifs détectés")
             else:
-                print("  → Impossible de filtrer les sports, scan complet")
+                print("  → Scan complet (filtre indisponible)")
 
-            # Étape 2 : scan uniquement les sports actifs de notre liste
+            # Étape 3 : scan des sports actifs de notre liste
             all_matches = []
             remaining   = "?"
             stop        = False
@@ -317,7 +337,6 @@ def refresh_loop():
             for sport_name, sport_key in SPORT_CANDIDATES:
                 if stop:
                     break
-                # Skip si le sport n'a pas de matchs à venir
                 if active_keys is not None and sport_key not in active_keys:
                     continue
 
@@ -325,19 +344,16 @@ def refresh_loop():
                 events, rem = fetch_odds(sport_key)
 
                 if events is None:
-                    if rem == "invalid_key":
-                        with LOCK:
-                            CACHE["status"] = "invalid_key"
-                        stop = True
-                        break
                     if rem == "quota":
+                        print("  Quota mensuel épuisé.")
                         with LOCK:
                             CACHE["status"] = "quota_exhausted"
                         stop = True
                         break
                     continue
 
-                remaining = rem
+                if rem not in ("?", "error"):
+                    remaining = rem
                 scanned  += 1
                 matches   = parse_matches(events, sport_name)
                 if matches:
