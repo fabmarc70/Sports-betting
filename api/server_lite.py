@@ -163,12 +163,9 @@ def fetch_odds(sport_key):
     url = f"{ODDS_API_BASE}/sports/{sport_key}/odds/"
     params = {
         "apiKey": ODDS_API_KEY,
-        # Liste élargie de bookmakers — plus il y en a, plus on détecte d'écarts
-        "bookmakers": (
-            "betclic,winamax,unibet_fr,pmu_fr,bwin,pinnacle,betfair_ex_eu,"
-            "betsson,leovegas_se,everygame,marathonbet,onexbet,tipico_de,"
-            "coolbet,betonlineag,gtbets,unibet,draftkings,fanduel,williamhill"
-        ),
+        # "regions" fonctionne sur tous les plans (gratuit inclus).
+        # "bookmakers" nécessite un plan payant → 401 sur le plan gratuit.
+        "regions": "eu,uk,us,au",
         "markets": "h2h",
         "oddsFormat": "decimal",
     }
