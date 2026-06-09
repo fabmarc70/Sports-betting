@@ -118,9 +118,31 @@
     /* ── FILTRES ─────────────────────────────── */
     #filter-bar {
       background: var(--card); border: 1px solid var(--border);
-      border-radius: 16px; padding: 14px 14px 10px; margin-bottom: 14px;
+      border-radius: 16px; margin-bottom: 14px; overflow: hidden;
     }
-    .filter-row { display: flex; flex-direction: column; gap: 12px; }
+    .filter-toggle {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 11px 14px; cursor: pointer; user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .filter-toggle-left { display: flex; align-items: center; gap: 8px; font-size: .78rem; font-weight: 700; color: var(--text2); }
+    .filter-toggle-right { display: flex; align-items: center; gap: 8px; }
+    .filter-active-pills { display: flex; gap: 4px; flex-wrap: wrap; }
+    .filter-active-pill {
+      font-size: .62rem; font-weight: 700; padding: 2px 7px;
+      border-radius: 99px; background: var(--yellow); color: #0a0c11;
+    }
+    .filter-chevron {
+      transition: transform .25s ease; flex-shrink: 0;
+      color: var(--text3);
+    }
+    .filter-chevron.open { transform: rotate(180deg); }
+    .filter-body {
+      padding: 0 14px 12px;
+      border-top: 1px solid var(--border);
+    }
+    .filter-body.collapsed { display: none; }
+    .filter-row { display: flex; flex-direction: column; gap: 12px; padding-top: 12px; }
     .filter-group { display: flex; flex-direction: column; gap: 6px; }
     .filter-label {
       font-size: .65rem; font-weight: 700; text-transform: uppercase;
@@ -512,6 +534,15 @@
 
   <!-- FILTRES -->
   <div id="filter-bar">
+    <div class="filter-toggle" onclick="toggleFilterBar()">
+      <div class="filter-toggle-left">
+        <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+        Filtres
+        <div class="filter-active-pills" id="filter-active-pills"></div>
+      </div>
+      <svg class="filter-chevron" id="filter-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="filter-body collapsed" id="filter-body">
     <div class="filter-row">
       <!-- Filtre date -->
       <div class="filter-group">
@@ -560,6 +591,7 @@
       </div>
     </div>
     <div class="filter-count" id="filter-count"></div>
+    </div><!-- /filter-body -->
   </div>
 
   <div class="section-label">Meilleures opportunités</div>
@@ -828,7 +860,31 @@ const FILTER_DEFAULTS = { date:'all', sport:'all', bm:'all', type:'all' };
 let _filters = JSON.parse(localStorage.getItem('sb_filters')||'{}');
 _filters = Object.assign({}, FILTER_DEFAULTS, _filters);
 
-function saveFilters(){ localStorage.setItem('sb_filters', JSON.stringify(_filters)); }
+// État ouvert/fermé du panneau de filtres (fermé par défaut)
+let _filterOpen = localStorage.getItem('sb_filter_open') === '1';
+
+function toggleFilterBar(){
+  _filterOpen = !_filterOpen;
+  localStorage.setItem('sb_filter_open', _filterOpen ? '1' : '0');
+  applyFilterBarState();
+}
+function applyFilterBarState(){
+  document.getElementById('filter-body').classList.toggle('collapsed', !_filterOpen);
+  document.getElementById('filter-chevron').classList.toggle('open', _filterOpen);
+}
+
+function saveFilters(){
+  localStorage.setItem('sb_filters', JSON.stringify(_filters));
+  updateActivePills();
+}
+
+function updateActivePills(){
+  const labels = { date:'Période', sport:'Sport', bm:'Bookmaker', type:'Type' };
+  const pills = document.getElementById('filter-active-pills');
+  if(!pills) return;
+  const active = Object.entries(_filters).filter(([k,v])=>v!=='all');
+  pills.innerHTML = active.map(([k,v])=>`<span class="filter-active-pill">${v}</span>`).join('');
+}
 
 function initChips(groupId, filterKey){
   document.getElementById(groupId).querySelectorAll('.chip').forEach(c=>{
@@ -928,6 +984,7 @@ function resetFilters(){
       c.classList.toggle('active', c.dataset.val==='all');
     });
   });
+  updateActivePills();
   applyFilters();
 }
 
@@ -1326,6 +1383,8 @@ function updateCalc(){
 // Initialise les chips fixes (date et type) avec la sélection sauvegardée
 initChips('chips-date', 'date');
 initChips('chips-type', 'type');
+applyFilterBarState();
+updateActivePills();
 fetchData();
 setInterval(fetchData, 60000);
 </script>
