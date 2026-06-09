@@ -319,6 +319,23 @@
     .legend-item { display: flex; align-items: center; gap: 8px; font-size: .8rem; }
     .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 
+    /* ── BOOKMAKER FREQ ─────────────────────── */
+    .bm-freq-row {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 9px; font-size: .8rem;
+    }
+    .bm-freq-row:last-child { margin-bottom: 0; }
+    .bm-freq-rank { width: 18px; text-align: center; font-weight: 800; color: var(--text3); font-size: .72rem; }
+    .bm-freq-name { width: 100px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bm-freq-track { flex: 1; background: var(--card2); border-radius: 4px; height: 12px; overflow: hidden; }
+    .bm-freq-fill { height: 100%; border-radius: 4px; transition: width .8s ease; }
+    .bm-freq-count { width: 32px; text-align: right; font-weight: 700; font-size: .75rem; color: var(--text2); }
+    .bm-freq-tag {
+      font-size: .6rem; font-weight: 800; padding: 2px 6px; border-radius: 99px;
+      text-transform: uppercase; letter-spacing: .04em; white-space: nowrap;
+    }
+    .bm-freq-tag.present { background: rgba(34,197,94,.18); color: #22c55e; }
+    .bm-freq-tag.absent  { background: rgba(160,168,190,.1); color: var(--text3); }
+
     /* ── HISTORIQUE ──────────────────────────── */
     .history-kpis {
       display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; margin-bottom: 14px;
@@ -646,6 +663,12 @@
       <svg width="110" height="110" viewBox="0 0 120 120" id="donut-svg"></svg>
       <div class="legend" id="donut-legend"><div style="color:var(--text3);font-size:.8rem">En attente…</div></div>
     </div>
+  </div>
+
+  <div class="section-label">Fréquence des bookmakers</div>
+  <div class="stats-chart-card">
+    <div class="chart-title">Bookmakers présents dans les arbitrages détectés</div>
+    <div id="bm-freq-list"><div style="color:var(--text3);font-size:.8rem">En attente…</div></div>
   </div>
 
   <div class="section-label">Gain par bookmaker</div>
@@ -1187,6 +1210,42 @@ async function fetchData(){
     (d.arbitrages||[]).forEach(a=>{sc[a.sport]=(sc[a.sport]||0)+1;});
     const sportColors = {football:'#3b82f6',basketball:'#a78bfa',tennis:'#22c55e',default:'#f5c518'};
     renderDonut(Object.entries(sc).map(([s,c])=>({sport:s,count:c,color:sportColors[s]||sportColors.default})));
+
+    // Fréquence des bookmakers
+    const bfreq={};
+    (d.arbitrages||[]).forEach(a=>{
+      a.bookmakers.split(' / ').forEach(b=>{bfreq[b]=(bfreq[b]||0)+1;});
+    });
+    const WATCHED_BMS = ['betclic','winamax','unibet','pmu','zebet','bwin','parionssport','pinnacle','bet365','betfair'];
+    const freqArr = Object.entries(bfreq).map(([k,n])=>({key:k,name:bmName(k),count:n}))
+      .sort((a,b)=>b.count-a.count);
+    const freqMax = freqArr[0]?.count || 1;
+    const barColors = ['#f5c518','#22c55e','#3b82f6','#a78bfa','#f87171','#38bdf8','#fb923c','#34d399','#e879f9','#facc15'];
+    const freqEl = document.getElementById('bm-freq-list');
+    if(freqArr.length === 0){
+      freqEl.innerHTML = '<div style="color:var(--text3);font-size:.8rem">Aucune donnée encore</div>';
+    } else {
+      // Always show watched bookmakers at the bottom even if count=0
+      const watchedMissing = WATCHED_BMS.filter(w=>!freqArr.find(f=>f.key.includes(w)));
+      const allRows = [...freqArr, ...watchedMissing.map(w=>({key:w,name:w.charAt(0).toUpperCase()+w.slice(1),count:0}))];
+      freqEl.innerHTML = allRows.map((b,i)=>{
+        const pct = Math.round(b.count/freqMax*100);
+        const color = b.count>0 ? barColors[i%barColors.length] : 'var(--text3)';
+        const isWatched = WATCHED_BMS.some(w=>b.key.includes(w));
+        const tag = isWatched
+          ? (b.count>0
+              ? `<span class="bm-freq-tag present">Disponible</span>`
+              : `<span class="bm-freq-tag absent">Absent</span>`)
+          : '';
+        return `<div class="bm-freq-row">
+          <div class="bm-freq-rank">${b.count>0?i+1:'—'}</div>
+          <div class="bm-freq-name">${b.name}</div>
+          <div class="bm-freq-track"><div class="bm-freq-fill" style="width:${pct}%;background:${color}"></div></div>
+          <div class="bm-freq-count">${b.count>0?b.count+'×':''}</div>
+          ${tag}
+        </div>`;
+      }).join('');
+    }
 
     // Gain par bookmaker
     const bg={};
