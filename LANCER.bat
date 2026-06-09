@@ -1,35 +1,46 @@
 @echo off
-title SportsBetting - Lancement
+title SportsBetting - Lancement initial
 cd /d "%~dp0"
+color 0A
 
-echo ================================================
-echo   SportsBetting - The Odds API (server_lite)
-echo ================================================
 echo.
-echo Mise a jour depuis GitHub...
+echo  ============================================
+echo    SportsBetting - Premier lancement
+echo  ============================================
+echo.
+
+REM --- Mise a jour du code ---
+echo  [1/3] Mise a jour depuis GitHub...
 git pull origin master
-
 echo.
-echo Installation Flask...
+
+REM --- Dependances ---
+echo  [2/3] Installation des dependances...
 pip install flask flask-cors requests -q 2>nul
 
-echo.
-echo Demarrage du serveur (The Odds API)...
-start "SportsBetting-API-LITE" cmd /k "cd /d %~dp0 && echo Serveur server_lite.py en cours... && python api\server_lite.py"
+REM --- Serveur Flask ---
+echo  [3/3] Demarrage du serveur API...
+start "SportsBetting-SERVEUR" cmd /k "title SportsBetting-SERVEUR && cd /d %~dp0 && python api\server_lite.py"
 
-echo Attente 5 secondes...
-timeout /t 5 /nobreak > nul
+echo  Attente 4 secondes...
+timeout /t 4 /nobreak > nul
 
-echo Demarrage tunnel Cloudflare...
-start "SportsBetting-Tunnel" cmd /k "cd /d %~dp0\api && tunnel.bat"
+REM --- Tunnel Cloudflare ---
+echo  Demarrage du tunnel Cloudflare...
+start "SportsBetting-TUNNEL" cmd /k "title SportsBetting-TUNNEL && cd /d %~dp0\api && tunnel.bat"
 
 echo.
-echo ================================================
-echo   LANCE ! Attendez la ligne :
-echo   [HH:MM] Raffraichi - XX arbitrages
-echo   dans la fenetre SportsBetting-API-LITE
+echo  ============================================
 echo.
-echo   Puis allez sur :
-echo   https://sports-betting-xi-nine.vercel.app
-echo ================================================
+echo    ETAPE SUIVANTE :
+echo    Dans la fenetre SportsBetting-TUNNEL,
+echo    copiez l URL https://xxxxx.trycloudflare.com
+echo    et collez-la dans le dashboard Vercel.
+echo.
+echo    Le tunnel tourne en permanence.
+echo    Pour mettre a jour le code : MISE_A_JOUR.bat
+echo    Pour tout arreter le soir  : ARRETER.bat
+echo.
+echo  ============================================
+echo.
 pause
