@@ -22,7 +22,7 @@ def add_headers(response):
 # ─────────────────────────────────────────────
 # CONFIGURATION
 # ─────────────────────────────────────────────
-ODDS_API_KEY  = os.environ.get("ODDS_API_KEY", "2dd8f5e82d2c99c2950e7c9aae554d22")
+ODDS_API_KEY  = os.environ.get("ODDS_API_KEY", "7ebdb38c7a2d29bfce9891baec108551")
 ODDS_API_BASE = "https://api.the-odds-api.com/v4"
 
 # Seuil minimum pour afficher une opportunité :
