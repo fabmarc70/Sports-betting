@@ -67,23 +67,33 @@
 
     /* ── API BANNER ──────────────────────────── */
     #api-banner {
-      display: none; flex-direction: column; gap: 8px;
+      display: none; flex-direction: column; gap: 10px;
       background: #0d1a0d; border-bottom: 2px solid var(--green);
-      padding: 12px 16px;
+      padding: 14px 16px;
     }
-    #api-banner label { color: var(--green); font-size: .8rem; font-weight: 700; }
+    #api-banner.offline-mode {
+      background: #1a0d0d; border-bottom-color: var(--red);
+    }
+    .api-banner-title {
+      font-size: .78rem; font-weight: 700; color: var(--green);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .api-banner-title.offline { color: var(--red); }
+    .api-hint { font-size: .72rem; color: var(--text3); }
     .api-row { display: flex; gap: 8px; }
     #api-input {
-      flex: 1; background: var(--card2); border: 1px solid var(--border);
-      color: var(--text); padding: 9px 12px; border-radius: 10px;
-      font-size: .85rem; outline: none;
+      flex: 1; background: var(--card2); border: 1.5px solid var(--border);
+      color: var(--text); padding: 10px 12px; border-radius: 10px;
+      font-size: .85rem; outline: none; min-width: 0;
     }
+    #api-input:focus { border-color: var(--yellow); }
     #api-save {
       background: var(--yellow); color: #0a0c11;
-      border: none; padding: 9px 18px; border-radius: 10px;
+      border: none; padding: 10px 20px; border-radius: 10px;
       font-weight: 800; font-size: .85rem; cursor: pointer;
-      white-space: nowrap;
+      white-space: nowrap; flex-shrink: 0;
     }
+    #api-save:active { opacity: .8; }
 
     /* ── SCROLL AREA ─────────────────────────── */
     .page { display: none; padding: 12px 12px 8px; max-width: 680px; margin: 0 auto; }
@@ -410,18 +420,25 @@
 
 <!-- HEADER -->
 <header>
-  <div class="logo-wrap" ondblclick="toggleApiPanel()">
+  <div class="logo-wrap">
     <span class="logo-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 6.6 2.5M12 2a10 10 0 0 0-6.6 2.5M2.4 8.5h19.2M2.4 15.5h19.2M12 22a10 10 0 0 1-6.6-2.5M12 22a10 10 0 0 0 6.6-2.5"/><ellipse cx="12" cy="12" rx="4" ry="10"/></svg></span>
     <div class="logo-text">Sports<span>Betting</span></div>
   </div>
-  <span class="status-dot demo" id="status-dot">Démo</span>
+  <span class="status-dot demo" id="status-dot" onclick="toggleApiPanel()" style="cursor:pointer">Démo</span>
+  <button id="btn-settings" onclick="toggleApiPanel()" aria-label="Configurer l'API" style="background:none;border:none;cursor:pointer;color:var(--text3);padding:6px;border-radius:8px;display:flex;align-items:center;transition:color .15s" onmouseenter="this.style.color='var(--yellow)'" onmouseleave="this.style.color='var(--text3)'">
+    <svg class="icon icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  </button>
 </header>
 
 <!-- API PANEL -->
 <div id="api-banner">
-  <label><svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> URL de votre API Cloudflare</label>
+  <div class="api-banner-title" id="api-banner-title">
+    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+    URL du tunnel Cloudflare
+  </div>
+  <div class="api-hint">Collez ici l'URL affichée dans la fenêtre du tunnel (change à chaque redémarrage)</div>
   <div class="api-row">
-    <input id="api-input" type="url" placeholder="https://xxxxx.trycloudflare.com" />
+    <input id="api-input" type="url" placeholder="https://xxxxx.trycloudflare.com" autocomplete="off" autocorrect="off" />
     <button id="api-save" onclick="saveApi()">Connecter</button>
   </div>
 </div>
@@ -609,7 +626,7 @@
 
 <script>
 // ── Constantes ──────────────────────────────────────────
-const DEFAULT_API = 'https://advance-shed-submitted-favourite.trycloudflare.com';
+const DEFAULT_API = 'https://owen-gtk-two-mate.trycloudflare.com';
 
 const TEAMS_FR = {
   'Ecuador':'Équateur','Tunisia':'Tunisie','Switzerland':'Suisse',
@@ -681,18 +698,30 @@ function switchPage(id){
 }
 
 // ── API Config ───────────────────────────────────────────
-function toggleApiPanel(){
+function toggleApiPanel(forceOpen){
   const b=document.getElementById('api-banner');
-  b.style.display = b.style.display==='flex' ? 'none' : 'flex';
+  const isOpen = b.style.display==='flex';
+  b.style.display = (forceOpen || !isOpen) ? 'flex' : 'none';
+  if(b.style.display==='flex'){
+    setTimeout(()=>document.getElementById('api-input').focus(), 80);
+  }
 }
+
+// Migrate: if stored URL is the old hardcoded default, clear it so new DEFAULT_API applies
+const _stored = localStorage.getItem('sb_api_url');
+const _oldDefaults = ['https://advance-shed-submitted-favourite.trycloudflare.com'];
+if(_oldDefaults.includes(_stored)) localStorage.removeItem('sb_api_url');
+
 const savedUrl = localStorage.getItem('sb_api_url') || DEFAULT_API;
 localStorage.setItem('sb_api_url', savedUrl);
 document.getElementById('api-input').value = savedUrl;
+
 function saveApi(){
   const url=document.getElementById('api-input').value.trim().replace(/\/$/,'');
   if(!url){return;}
   localStorage.setItem('sb_api_url', url);
   document.getElementById('api-banner').style.display = 'none';
+  document.getElementById('api-banner').classList.remove('offline-mode');
   fetchData();
 }
 
@@ -906,12 +935,26 @@ async function fetchData(){
     fetchHistoryForStats();
 
     dot.className='status-dot online'; dot.textContent='En ligne';
+    const banner = document.getElementById('api-banner');
+    if(banner.style.display==='flex' && !banner.classList.contains('offline-mode')){
+      // keep open if user opened manually
+    } else {
+      banner.style.display='none';
+      banner.classList.remove('offline-mode');
+    }
+    document.getElementById('api-banner-title').className = 'api-banner-title';
+    document.getElementById('api-banner-title').innerHTML = `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> URL du tunnel Cloudflare`;
     const t = d.last_update ? new Date(d.last_update).toLocaleTimeString('fr-FR') : '';
     footer.textContent = 'Mis à jour à '+t+' · Prochain rafraîchissement dans 60s';
 
   }catch(e){
     dot.className='status-dot offline'; dot.textContent='Hors ligne';
-    footer.textContent = 'API inaccessible — vérifiez que server_lite.py et tunnel.bat tournent';
+    footer.textContent = 'API inaccessible — vérifiez que server_lite.py et le tunnel tournent';
+    const banner = document.getElementById('api-banner');
+    banner.classList.add('offline-mode');
+    document.getElementById('api-banner-title').className = 'api-banner-title offline';
+    document.getElementById('api-banner-title').innerHTML = `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Connexion impossible — mettez à jour l'URL`;
+    toggleApiPanel(true);
   }
 }
 
