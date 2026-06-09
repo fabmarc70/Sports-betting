@@ -37,7 +37,7 @@ MIN_TRJ_RATIO = 0.985
 # Formule : 500 req / (N_sports × 30j × 24h × 3600 / REFRESH_SEC) ≈ budget
 # Avec ~15 sports actifs : 500 / (15 × 30) ≈ 1 scan/jour → trop peu
 # Solution : on ne scanne que les sports qui ont des matchs (via /sports actifs)
-REFRESH_SEC = 600  # 10 minutes
+REFRESH_SEC = 3600  # 1 heure — économise le quota (500 req/mois = ~16/jour max)
 
 # Candidats sports à scanner — on filtrera dynamiquement ceux avec des matchs actifs
 # Classés par priorité (bookmakers divergent plus sur les marchés moins surveillés)
@@ -101,8 +101,26 @@ CACHE = {
 }
 LOCK = threading.Lock()
 
-HISTORY_FILE = pathlib.Path(__file__).parent / "history.json"
-MAX_HISTORY   = 2000
+HISTORY_FILE      = pathlib.Path(__file__).parent / "history.json"
+BLOCKED_FILE      = pathlib.Path(__file__).parent / "blocked_sports.json"
+MAX_HISTORY       = 2000
+
+def load_blocked_sports():
+    """Sports qui retournent 401 — on ne les re-requête jamais."""
+    if BLOCKED_FILE.exists():
+        try:
+            return set(json.loads(BLOCKED_FILE.read_text()))
+        except Exception:
+            return set()
+    return set()
+
+def save_blocked_sport(key):
+    blocked = load_blocked_sports()
+    blocked.add(key)
+    try:
+        BLOCKED_FILE.write_text(json.dumps(list(blocked)))
+    except Exception:
+        pass
 
 
 def load_history():
@@ -184,8 +202,9 @@ def fetch_odds(sport_key):
             data = r.json()
             return (data if isinstance(data, list) else []), remaining
         if r.status_code == 401:
-            # Certains sports nécessitent un plan payant → on passe au suivant
-            print(f"    → {sport_key} non disponible sur ce plan (401), ignoré")
+            # Sport non disponible sur ce plan → mémorisé, ne sera plus jamais re-requêté
+            print(f"    → {sport_key} bloqué (401), mémorisé")
+            save_blocked_sport(sport_key)
             return [], remaining
         if r.status_code == 422:
             # Sport inexistant ou hors saison
@@ -333,10 +352,13 @@ def refresh_loop():
             remaining   = "?"
             stop        = False
             scanned     = 0
+            blocked     = load_blocked_sports()
 
             for sport_name, sport_key in SPORT_CANDIDATES:
                 if stop:
                     break
+                if sport_key in blocked:
+                    continue  # Jamais re-requêté
                 if active_keys is not None and sport_key not in active_keys:
                     continue
 
