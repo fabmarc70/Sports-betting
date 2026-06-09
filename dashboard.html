@@ -182,11 +182,18 @@
       padding: 8px 14px;
       background: #0f120a;
     }
+    .match-footer.near-arb { background: #130e00; border-top-color: #3d2e00; }
     .gain-badge {
       font-size: .78rem; font-weight: 800; color: var(--green);
       display: flex; align-items: center; gap: 5px;
     }
     .gain-badge::before { content: '▲'; font-size: .6rem; }
+    .gain-badge.near { color: #f59e0b; }
+    .near-arb-tag {
+      font-size: .62rem; font-weight: 700; color: #f59e0b;
+      background: #2a1e00; border: 1px solid #3d2e00;
+      padding: 2px 7px; border-radius: 5px; flex-shrink: 0;
+    }
     .trj-badge {
       font-size: .72rem; font-weight: 700; color: var(--text2);
       background: var(--card2); border: 1px solid var(--border);
@@ -785,8 +792,9 @@ function renderArbitrages(arbs){
         <div class="team-name">${t2}</div>
       </div>
       <div class="odds-row">${oddsHtml}</div>
-      <div class="match-footer">
-        <div class="gain-badge">+€${r.gain_100} / €100</div>
+      <div class="match-footer${r.status==='near_arb'?' near-arb':''}">
+        <div class="gain-badge${r.status==='near_arb'?' near':''}">${r.status==='arb'?'+€'+r.gain_100+' / €100':'~'+r.gain_100+'%'}</div>
+        ${r.status==='near_arb'?'<span class="near-arb-tag">Near-arb</span>':''}
         <div class="calc-cta"><svg class="icon icon-sm" style="margin-right:3px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/></svg> Calculer</div>
         <div class="trj-badge">TRJ ${r.trj}%</div>
       </div>
@@ -871,7 +879,9 @@ function renderLine(vals){
 
 // ── Fetch Data ───────────────────────────────────────────
 function updateKpis(kpis){
-  document.getElementById('kpi-arb').textContent = kpis.nb_arbitrages ?? '0';
+  const totalArbs = (kpis.nb_arbitrages ?? 0) + (kpis.nb_near_arbs ?? 0);
+  document.getElementById('kpi-arb').textContent = totalArbs || '0';
+  document.getElementById('kpi-arb').title = `${kpis.nb_arbitrages??0} arbs + ${kpis.nb_near_arbs??0} near-arbs`;
   document.getElementById('kpi-trj').textContent = kpis.trj_moyen ? kpis.trj_moyen+'%' : '—';
   document.getElementById('kpi-pv').textContent  = kpis.gain_potentiel ? '+€'+kpis.gain_potentiel : '—';
   document.getElementById('kpi-bm').textContent  = kpis.nb_bookmakers ?? '—';
@@ -945,7 +955,9 @@ async function fetchData(){
     document.getElementById('api-banner-title').className = 'api-banner-title';
     document.getElementById('api-banner-title').innerHTML = `<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> URL du tunnel Cloudflare`;
     const t = d.last_update ? new Date(d.last_update).toLocaleTimeString('fr-FR') : '';
-    footer.textContent = 'Mis à jour à '+t+' · Prochain rafraîchissement dans 60s';
+    const nb_arb  = d.kpis?.nb_arbitrages ?? 0;
+    const nb_near = d.kpis?.nb_near_arbs  ?? 0;
+    footer.textContent = `Mis à jour à ${t} · ${nb_arb} arb${nb_arb!==1?'s':''} garanti${nb_arb!==1?'s':''} + ${nb_near} near-arb${nb_near!==1?'s':''} · Prochain scan dans 10 min`;
 
   }catch(e){
     dot.className='status-dot offline'; dot.textContent='Hors ligne';
