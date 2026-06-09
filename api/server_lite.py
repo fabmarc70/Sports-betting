@@ -72,7 +72,7 @@ SPORT_CANDIDATES = [
     ("basketball", "basketball_ncaab"),
     ("basketball", "basketball_euroleague"),
     ("basketball", "basketball_nbl"),              # ← Australie
-    # Tennis (les bookmakers divergent beaucoup sur les tournois mineurs)
+    # Tennis — Grands Chelems
     ("tennis", "tennis_atp_french_open"),
     ("tennis", "tennis_wta_french_open"),
     ("tennis", "tennis_atp_wimbledon"),
@@ -81,6 +81,14 @@ SPORT_CANDIDATES = [
     ("tennis", "tennis_wta_us_open"),
     ("tennis", "tennis_atp_aus_open"),
     ("tennis", "tennis_wta_aus_open"),
+    # Tennis — tournois ATP/WTA hebdomadaires
+    ("tennis", "tennis_atp"),
+    ("tennis", "tennis_wta"),
+    ("tennis", "tennis_atp_double"),
+    ("tennis", "tennis_wta_double"),
+    ("tennis", "tennis_challenger_men"),
+    ("tennis", "tennis_itf_men"),
+    ("tennis", "tennis_itf_women"),
     # MMA/UFC — écarts de cotes souvent importants entre bookmakers
     ("mma", "mma_mixed_martial_arts"),
     # Rugby
