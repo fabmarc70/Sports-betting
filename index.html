@@ -120,10 +120,10 @@
     @media(min-width: 480px){ .kpi-strip { grid-template-columns: repeat(4, 1fr); } }
     .kpi-card {
       background: var(--card); border: 1px solid var(--border);
-      border-radius: 14px; padding: 12px 14px;
+      border-radius: 14px; padding: 10px 12px;
     }
     .kpi-label { font-size: .68rem; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
-    .kpi-value { font-size: 1.45rem; font-weight: 800; line-height: 1; }
+    .kpi-value { font-size: 1.25rem; font-weight: 800; line-height: 1; }
     .kpi-value.yellow { color: var(--yellow); }
     .kpi-value.green  { color: var(--green); }
     .kpi-value.blue   { color: var(--blue); }
@@ -229,15 +229,15 @@
     .sport-badge.default    { background: #2a1e0d; color: var(--yellow); }
 
     .match-teams {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 14px 8px;
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 14px 6px;
     }
     .team-name {
-      flex: 1; font-size: 1rem; font-weight: 700; text-align: center;
+      flex: 1; font-size: .88rem; font-weight: 700; text-align: center;
       line-height: 1.2;
     }
     .vs-sep {
-      font-size: .7rem; color: var(--text3); font-weight: 700;
+      font-size: .62rem; color: var(--text3); font-weight: 700;
       padding: 0 2px; flex-shrink: 0;
     }
 
@@ -390,104 +390,166 @@
     .nav-item-wrap { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; }
 
     /* ── MODAL CALCULATEUR ───────────────────── */
+    /* ── MODAL PREMIUM ───────────────────────── */
     .modal-overlay {
       display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,.8); z-index: 100;
-      align-items: flex-end; justify-content: center;
-      padding: 0;
+      background: rgba(0,0,0,.7); backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 100; align-items: flex-end; justify-content: center;
     }
     .modal-overlay.open { display: flex; }
     .modal {
-      background: var(--card); width: 100%; max-width: 620px;
-      border-radius: 20px 20px 0 0;
-      border: 1px solid var(--border); border-bottom: none;
-      max-height: 92dvh; overflow-y: auto;
+      background: #0e1020; width: 100%; max-width: 560px;
+      border-radius: 24px 24px 0 0;
+      border: 1px solid rgba(255,255,255,.09); border-bottom: none;
+      max-height: 94dvh; overflow-y: auto;
       padding-bottom: env(safe-area-inset-bottom);
     }
     .modal-handle {
-      width: 40px; height: 4px; background: var(--border);
-      border-radius: 2px; margin: 12px auto 0;
+      width: 36px; height: 4px; background: rgba(255,255,255,.15);
+      border-radius: 2px; margin: 10px auto 0;
     }
-    .modal-header { padding: 16px 20px 14px; border-bottom: 1px solid var(--border); }
-    .modal-match-name { font-size: 1.05rem; font-weight: 800; margin-bottom: 8px; }
-    .modal-tags { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+    /* Hero sport */
+    .modal-hero {
+      position: relative; overflow: hidden;
+      height: 130px; margin: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-end;
+      padding-bottom: 14px;
+    }
+    .modal-hero-bg {
+      position: absolute; inset: 0;
+      background-size: cover; background-position: center;
+    }
+    .modal-hero-bg::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(14,16,32,.1) 0%, rgba(14,16,32,.85) 100%);
+    }
+    /* Sport backgrounds via CSS */
+    .hero-football  { background: linear-gradient(135deg, #0d3d1a 0%, #0a2e12 40%, #051a0a 100%); }
+    .hero-basketball{ background: linear-gradient(135deg, #3d1a06 0%, #2a1204 40%, #150a02 100%); }
+    .hero-tennis    { background: linear-gradient(135deg, #1a3d0d 0%, #122a08 40%, #091502 100%); }
+    .hero-mma       { background: linear-gradient(135deg, #3d0d0d 0%, #2a0808 40%, #150404 100%); }
+    .hero-baseball  { background: linear-gradient(135deg, #2a1a08 0%, #1a1005 40%, #0d0802 100%); }
+    .hero-hockey    { background: linear-gradient(135deg, #0d1e3d 0%, #08142a 40%, #040a15 100%); }
+    .hero-default   { background: linear-gradient(135deg, #1a0d3d 0%, #12082a 40%, #080415 100%); }
+
+    /* Field/court SVG overlay per sport */
+    .hero-field {
+      position: absolute; inset: 0; opacity: .18;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .hero-field svg { width: 200px; height: 100px; }
+
+    /* Team avatars */
+    .modal-teams {
+      position: relative; z-index: 2;
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 2px;
+    }
+    .team-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .75rem; font-weight: 900; letter-spacing: -.02em;
+      border: 2px solid rgba(255,255,255,.2);
+      flex-shrink: 0; text-transform: uppercase;
+    }
+    .modal-vs {
+      font-size: .65rem; font-weight: 800; color: rgba(255,255,255,.5);
+      flex-shrink: 0; letter-spacing: .06em;
+    }
+    .modal-match-title {
+      position: relative; z-index: 2;
+      font-size: .78rem; font-weight: 700; color: rgba(255,255,255,.6);
+      text-align: center; letter-spacing: .02em;
+    }
+
+    /* Tags under hero */
+    .modal-tags-row {
+      display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
+      padding: 10px 16px 0;
+    }
     .m-tag {
-      font-size: .72rem; font-weight: 700; padding: 3px 9px;
-      border-radius: 7px;
+      font-size: .65rem; font-weight: 700; padding: 3px 8px;
+      border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;
     }
-    .m-tag.trj { background: #1a2540; color: var(--blue); border: 1px solid var(--blue); }
-    .m-tag.date { background: #2a1e0d; color: var(--yellow); }
-    .m-tag.sport { background: var(--card2); color: var(--text2); border: 1px solid var(--border); }
+    .m-tag.trj  { background: rgba(59,130,246,.15); color: #60a5fa; border: 1px solid rgba(59,130,246,.3); }
+    .m-tag.date { background: rgba(245,197,24,.12); color: var(--yellow); }
+    .m-tag.sport{ background: rgba(255,255,255,.06); color: var(--text2); }
+    .m-tag.market { background: rgba(167,139,250,.12); color: #c4b5fd; }
+
     .alert-bar {
-      margin: 0 20px 0; background: #1e1400; border-left: 3px solid var(--yellow);
-      padding: 10px 14px; border-radius: 0 8px 8px 0;
-      font-size: .78rem; color: var(--yellow);
-      margin-top: 14px;
+      margin: 10px 16px 0;
+      background: rgba(245,197,24,.08); border: 1px solid rgba(245,197,24,.2);
+      padding: 8px 12px; border-radius: 10px;
+      font-size: .72rem; color: var(--yellow);
+      display: flex; align-items: center; gap: 7px;
     }
-    .modal-body { padding: 16px 20px; }
+
+    .modal-body { padding: 12px 16px 4px; }
     .stake-section {
-      background: var(--card2); border: 1px solid var(--border);
-      border-radius: 14px; padding: 14px 16px; margin-bottom: 18px;
-      display: flex; align-items: center; gap: 12px;
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 12px; padding: 10px 14px; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 10px;
     }
-    .stake-label { flex: 1; font-size: .85rem; font-weight: 700; }
-    .stake-input-wrap { display: flex; align-items: center; gap: 6px; }
+    .stake-label { flex: 1; font-size: .78rem; font-weight: 700; color: var(--text2); }
+    .stake-input-wrap { display: flex; align-items: center; gap: 5px; }
     .stake-input {
-      background: var(--bg); border: 2px solid var(--yellow);
-      color: var(--yellow); padding: 8px 10px; border-radius: 10px;
-      font-size: 1.2rem; font-weight: 800; width: 100px; outline: none; text-align: center;
+      background: rgba(245,197,24,.08); border: 1.5px solid rgba(245,197,24,.5);
+      color: var(--yellow); padding: 6px 8px; border-radius: 8px;
+      font-size: 1rem; font-weight: 800; width: 80px; outline: none; text-align: center;
     }
-    .stake-currency { color: var(--yellow); font-size: 1rem; font-weight: 800; }
+    .stake-currency { color: var(--yellow); font-size: .9rem; font-weight: 800; }
 
     .steps-header {
-      font-size: .7rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: .1em; color: var(--text3); margin-bottom: 10px;
+      font-size: .62rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--text3); margin-bottom: 8px;
     }
     .step-card {
-      background: var(--card2); border: 1px solid var(--border);
-      border-radius: 14px; padding: 14px 16px; margin-bottom: 8px;
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07);
+      border-radius: 12px; padding: 10px 12px; margin-bottom: 6px;
     }
-    .step-top { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .step-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
     .step-num {
-      width: 24px; height: 24px; border-radius: 50%;
+      width: 20px; height: 20px; border-radius: 50%;
       background: var(--yellow); color: #0a0c11;
-      font-size: .72rem; font-weight: 900;
+      font-size: .65rem; font-weight: 900;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
-    .step-bm-name { font-size: .95rem; font-weight: 800; flex: 1; }
-    .step-link { font-size: .72rem; color: var(--blue); }
-    .step-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .step-fields.three { grid-template-columns: 1fr 1fr 1fr; }
-    .step-field { background: var(--bg); border-radius: 10px; padding: 10px 12px; }
-    .sf-lbl { font-size: .62rem; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
-    .sf-val { font-size: .88rem; font-weight: 700; }
-    .sf-val.yellow { color: var(--yellow); font-size: 1rem; }
-    .sf-val.green  { color: var(--green); font-size: 1.05rem; }
-    .sf-val.blue   { color: var(--blue); }
-    .step-return-note { font-size: .72rem; color: var(--text3); margin-top: 8px; text-align: right; }
+    .step-bm-name { font-size: .82rem; font-weight: 800; flex: 1; }
+    .step-link { font-size: .65rem; color: #60a5fa; display: inline-flex; align-items: center; gap: 2px; }
+    .step-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+    .step-field { background: rgba(0,0,0,.25); border-radius: 8px; padding: 7px 10px; }
+    .sf-lbl { font-size: .58rem; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 3px; }
+    .sf-val { font-size: .8rem; font-weight: 700; }
+    .sf-val.yellow { color: var(--yellow); }
+    .sf-val.green  { color: var(--green); }
+    .sf-val.blue   { color: #60a5fa; }
+    .step-return-note { font-size: .65rem; color: var(--text3); margin-top: 6px; text-align: right; }
     .step-return-note strong { color: var(--green); }
 
     .summary-box {
-      background: #0a1a0a; border: 1px solid var(--green);
-      border-radius: 14px; padding: 16px; margin-top: 16px;
+      background: rgba(34,197,94,.06); border: 1px solid rgba(34,197,94,.2);
+      border-radius: 12px; padding: 12px; margin-top: 10px;
     }
-    .summary-title { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--green); margin-bottom: 12px; }
-    .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-    .si-lbl { font-size: .68rem; color: var(--text3); margin-bottom: 3px; }
-    .si-val { font-size: .95rem; font-weight: 700; }
+    .summary-title { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #4ade80; margin-bottom: 10px; }
+    .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .si-lbl { font-size: .62rem; color: var(--text3); margin-bottom: 2px; }
+    .si-val { font-size: .85rem; font-weight: 700; }
     .profit-bar {
-      background: var(--green); color: #0a0c11;
-      border-radius: 10px; padding: 12px 16px;
+      background: linear-gradient(90deg, #16a34a, #22c55e);
+      border-radius: 10px; padding: 10px 14px;
       display: flex; align-items: center; justify-content: space-between;
     }
-    .pb-label { font-size: .85rem; font-weight: 700; }
-    .pb-value { font-size: 1.5rem; font-weight: 900; }
-    .modal-footer { padding: 12px 20px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+    .pb-label { font-size: .75rem; font-weight: 700; color: #0a0c11; }
+    .pb-value { font-size: 1.25rem; font-weight: 900; color: #0a0c11; }
+    .modal-footer { padding: 10px 16px 14px; display: flex; gap: 8px; }
     .btn-close {
-      flex: 1; background: var(--card2); border: 1px solid var(--border);
-      color: var(--text); padding: 12px; border-radius: 12px;
-      font-size: .88rem; font-weight: 700; cursor: pointer;
+      flex: 1; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08);
+      color: var(--text2); padding: 11px; border-radius: 12px;
+      font-size: .82rem; font-weight: 700; cursor: pointer;
     }
     .btn-close:active { opacity: .7; }
 
@@ -735,24 +797,38 @@
 <div class="modal-overlay" id="calc-modal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-header">
-      <div class="modal-match-name" id="calc-match">—</div>
-      <div class="modal-tags">
-        <span class="m-tag sport" id="calc-sport-badge">—</span>
-        <span class="m-tag trj" id="calc-trj-badge">TRJ —%</span>
-        <span class="m-tag date" id="calc-date-badge"></span>
+
+    <!-- Hero sport -->
+    <div class="modal-hero" id="calc-hero">
+      <div class="modal-hero-bg" id="calc-hero-bg"></div>
+      <div class="hero-field" id="calc-hero-field"></div>
+      <div class="modal-teams">
+        <div class="team-avatar" id="calc-avatar-1"></div>
+        <div class="modal-vs">VS</div>
+        <div class="team-avatar" id="calc-avatar-2"></div>
       </div>
+      <div class="modal-match-title" id="calc-match">—</div>
     </div>
-    <div class="alert-bar" style="display:flex;align-items:center;gap:8px"><svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Agissez vite — cotes valables 2 à 3 min. Placez tous les paris dans l'ordre.</div>
+
+    <!-- Tags -->
+    <div class="modal-tags-row">
+      <span class="m-tag sport" id="calc-sport-badge">—</span>
+      <span class="m-tag trj" id="calc-trj-badge">TRJ —%</span>
+      <span class="m-tag date" id="calc-date-badge"></span>
+      <span class="m-tag market" id="calc-market-badge" style="display:none"></span>
+    </div>
+
+    <div class="alert-bar"><svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Cotes valables 2-3 min — placez les paris dans l'ordre.</div>
+
     <div class="modal-body">
       <div class="stake-section">
-        <div class="stake-label">Montant total à répartir</div>
+        <div class="stake-label">Montant à répartir</div>
         <div class="stake-input-wrap">
           <input class="stake-input" type="number" id="calc-stake" value="100" min="1" oninput="updateCalc()" />
           <span class="stake-currency">€</span>
         </div>
       </div>
-      <div class="steps-header">Instructions étape par étape</div>
+      <div class="steps-header">Étapes</div>
       <div id="calc-steps"></div>
       <div class="summary-box">
         <div class="summary-title">Récapitulatif</div>
@@ -1412,14 +1488,84 @@ async function fetchHistoryForStats(){
 
 // ── Calculateur ───────────────────────────────────────────
 let _currentArb = null;
+// Avatar colors based on team name hash
+function teamColor(name){
+  const palette=['#6366f1','#8b5cf6','#ec4899','#f59e0b','#10b981','#3b82f6','#ef4444','#14b8a6','#f97316','#84cc16'];
+  let h=0; for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))&0xffff;
+  return palette[h%palette.length];
+}
+function teamInitials(name){
+  return name.trim().split(/\s+/).map(w=>w[0]?.toUpperCase()||'').slice(0,2).join('');
+}
+
+// Sport field SVG
+const SPORT_FIELDS = {
+  football: `<svg viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="1" y="1" width="198" height="98" rx="4" stroke="white" stroke-width="1.5"/>
+    <circle cx="100" cy="50" r="18" stroke="white" stroke-width="1.5"/>
+    <line x1="100" y1="1" x2="100" y2="99" stroke="white" stroke-width="1.5"/>
+    <rect x="1" y="28" width="20" height="44" stroke="white" stroke-width="1.5"/>
+    <rect x="179" y="28" width="20" height="44" stroke="white" stroke-width="1.5"/>
+  </svg>`,
+  basketball: `<svg viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="1" y="1" width="198" height="98" rx="4" stroke="white" stroke-width="1.5"/>
+    <circle cx="100" cy="50" r="18" stroke="white" stroke-width="1.5"/>
+    <line x1="100" y1="1" x2="100" y2="99" stroke="white" stroke-width="1.5"/>
+    <rect x="1" y="22" width="48" height="56" stroke="white" stroke-width="1.5"/>
+    <rect x="151" y="22" width="48" height="56" stroke="white" stroke-width="1.5"/>
+    <circle cx="25" cy="50" r="10" stroke="white" stroke-width="1.5"/>
+    <circle cx="175" cy="50" r="10" stroke="white" stroke-width="1.5"/>
+  </svg>`,
+  tennis: `<svg viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="1" y="1" width="198" height="98" rx="4" stroke="white" stroke-width="1.5"/>
+    <line x1="100" y1="1" x2="100" y2="99" stroke="white" stroke-width="1.5"/>
+    <line x1="1" y1="50" x2="199" y2="50" stroke="white" stroke-width="1"/>
+    <rect x="20" y="14" width="160" height="72" stroke="white" stroke-width="1.5"/>
+    <line x1="20" y1="50" x2="180" y2="50" stroke="white" stroke-width="2"/>
+  </svg>`,
+  mma: `<svg viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="100,5 185,35 185,65 100,95 15,65 15,35" stroke="white" stroke-width="1.5"/>
+    <circle cx="100" cy="50" r="20" stroke="white" stroke-width="1.5"/>
+  </svg>`,
+  default: `<svg viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="1" y="1" width="198" height="98" rx="8" stroke="white" stroke-width="1.5"/>
+    <circle cx="100" cy="50" r="22" stroke="white" stroke-width="1.5"/>
+    <line x1="100" y1="1" x2="100" y2="99" stroke="white" stroke-width="1.5"/>
+  </svg>`,
+};
+
 function openCalc(idx){
   _currentArb = _arbData[idx];
   const a = _currentArb;
-  document.getElementById('calc-match').textContent = a.match.split(' vs ').map(tr).join(' vs ');
+  const teams = a.match ? a.match.split(' vs ') : ['?','?'];
+  const t1 = tr(teams[0]||'');
+  const t2 = tr(teams[1]||'?');
+
+  // Hero background
+  const heroClass = {football:'hero-football',basketball:'hero-basketball',tennis:'hero-tennis',mma:'hero-mma',baseball:'hero-baseball',americanfootball:'hero-football',icehockey:'hero-hockey'}[a.sport] || 'hero-default';
+  const heroBg = document.getElementById('calc-hero-bg');
+  heroBg.className = 'modal-hero-bg ' + heroClass;
+
+  // Field SVG
+  const sportKey = Object.keys(SPORT_FIELDS).find(k=>a.sport?.includes(k)) || 'default';
+  document.getElementById('calc-hero-field').innerHTML = SPORT_FIELDS[sportKey] || SPORT_FIELDS.default;
+
+  // Team avatars
+  const av1 = document.getElementById('calc-avatar-1');
+  const av2 = document.getElementById('calc-avatar-2');
+  const c1 = teamColor(t1), c2 = teamColor(t2);
+  av1.textContent = teamInitials(t1); av1.style.background = c1+'33'; av1.style.borderColor = c1; av1.style.color = c1;
+  av2.textContent = teamInitials(t2); av2.style.background = c2+'33'; av2.style.borderColor = c2; av2.style.color = c2;
+
+  document.getElementById('calc-match').textContent = `${t1} vs ${t2}`;
   document.getElementById('calc-sport-badge').innerHTML = `${sportIcon(a.sport)} ${sportFr(a.sport)}`;
   document.getElementById('calc-trj-badge').textContent = 'TRJ '+a.trj+'%';
   const d = a.date ? (() => { try { const dt=new Date(a.date); return isNaN(dt)?'':dt.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}); } catch(e){return '';} })() : '';
   document.getElementById('calc-date-badge').textContent = d;
+  const mkt = a.market;
+  const mktEl = document.getElementById('calc-market-badge');
+  if(mkt && mkt!=='1X2'){ mktEl.textContent = mkt; mktEl.style.display=''; } else { mktEl.style.display='none'; }
+
   document.getElementById('calc-stake').value = 100;
   updateCalc();
   document.getElementById('calc-modal').classList.add('open');
