@@ -42,23 +42,23 @@ REFRESH_SEC = 3600  # 1 heure — économise le quota (500 req/mois = ~16/jour m
 # Candidats sports à scanner — on filtrera dynamiquement ceux avec des matchs actifs
 # Classés par priorité (bookmakers divergent plus sur les marchés moins surveillés)
 SPORT_CANDIDATES = [
-    # Football — grands championnats + ligues secondaires
+    # Football
     ("football", "soccer_fifa_world_cup"),
     ("football", "soccer_uefa_nations_league_a"),
     ("football", "soccer_uefa_nations_league"),
     ("football", "soccer_conmebol_copa_america"),
     ("football", "soccer_france_ligue1"),
-    ("football", "soccer_france_ligue2"),          # ← Ligue 2
+    ("football", "soccer_france_ligue2"),
     ("football", "soccer_epl"),
-    ("football", "soccer_england_league1"),        # ← League One
-    ("football", "soccer_england_league2"),        # ← League Two
+    ("football", "soccer_england_league1"),
+    ("football", "soccer_england_league2"),
     ("football", "soccer_spain_la_liga"),
     ("football", "soccer_spain_segunda_division"),
     ("football", "soccer_germany_bundesliga"),
     ("football", "soccer_germany_bundesliga2"),
     ("football", "soccer_italy_serie_a"),
     ("football", "soccer_italy_serie_b"),
-    ("football", "soccer_brazil_campeonato"),      # ← Brasileirão
+    ("football", "soccer_brazil_campeonato"),
     ("football", "soccer_argentina_primera_division"),
     ("football", "soccer_mexico_ligamx"),
     ("football", "soccer_netherlands_eredivisie"),
@@ -71,7 +71,7 @@ SPORT_CANDIDATES = [
     ("basketball", "basketball_nba"),
     ("basketball", "basketball_ncaab"),
     ("basketball", "basketball_euroleague"),
-    ("basketball", "basketball_nbl"),              # ← Australie
+    ("basketball", "basketball_nbl"),
     # Tennis — Grands Chelems
     ("tennis", "tennis_atp_french_open"),
     ("tennis", "tennis_wta_french_open"),
@@ -81,7 +81,7 @@ SPORT_CANDIDATES = [
     ("tennis", "tennis_wta_us_open"),
     ("tennis", "tennis_atp_aus_open"),
     ("tennis", "tennis_wta_aus_open"),
-    # Tennis — tournois ATP/WTA hebdomadaires
+    # Tennis — tournois hebdomadaires
     ("tennis", "tennis_atp"),
     ("tennis", "tennis_wta"),
     ("tennis", "tennis_atp_double"),
@@ -89,16 +89,9 @@ SPORT_CANDIDATES = [
     ("tennis", "tennis_challenger_men"),
     ("tennis", "tennis_itf_men"),
     ("tennis", "tennis_itf_women"),
-    # MMA/UFC — écarts de cotes souvent importants entre bookmakers
+    # MMA
     ("mma", "mma_mixed_martial_arts"),
-    # Rugby
-    ("rugby", "rugbyleague_nrl"),
-    ("rugby", "rugbyunion_premiership"),
-    ("rugby", "rugbyunion_six_nations"),
-    # Baseball
-    ("baseball", "baseball_mlb"),
-    # Hockey
-    ("hockey", "icehockey_nhl"),
+    # Badminton (pas couvert par The Odds API — ignoré automatiquement)
 ]
 
 CACHE = {
