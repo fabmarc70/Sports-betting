@@ -115,6 +115,45 @@
     .kpi-value.blue   { color: var(--blue); }
     .kpi-sub { font-size: .65rem; color: var(--text3); margin-top: 3px; }
 
+    /* ── FILTRES ─────────────────────────────── */
+    #filter-bar {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 14px 14px 10px; margin-bottom: 14px;
+    }
+    .filter-row { display: flex; flex-direction: column; gap: 12px; }
+    .filter-group { display: flex; flex-direction: column; gap: 6px; }
+    .filter-label {
+      font-size: .65rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--text3);
+      display: flex; align-items: center; gap: 5px;
+    }
+    .filter-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip {
+      background: var(--card2); border: 1px solid var(--border);
+      color: var(--text3); padding: 5px 12px; border-radius: 99px;
+      font-size: .75rem; font-weight: 600; cursor: pointer;
+      transition: all .15s; white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .chip:active { opacity: .7; }
+    .chip.active {
+      background: var(--yellow); border-color: var(--yellow);
+      color: #0a0c11; font-weight: 800;
+    }
+    .chip.active.sport-football   { background: #3b82f6; border-color: #3b82f6; color: #fff; }
+    .chip.active.sport-basketball { background: #a78bfa; border-color: #a78bfa; color: #fff; }
+    .chip.active.sport-tennis     { background: #22c55e; border-color: #22c55e; color: #fff; }
+    .chip.active.sport-mma        { background: #ef4444; border-color: #ef4444; color: #fff; }
+    .chip.active.sport-baseball   { background: #f97316; border-color: #f97316; color: #fff; }
+    .chip.active.sport-hockey     { background: #38bdf8; border-color: #38bdf8; color: #fff; }
+    .chip.active.sport-rugby      { background: #84cc16; border-color: #84cc16; color: #fff; }
+    .filter-count {
+      font-size: .7rem; color: var(--text3); margin-top: 10px;
+      padding-top: 8px; border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .filter-count strong { color: var(--yellow); }
+
     /* ── SECTION LABEL ───────────────────────── */
     .section-label {
       font-size: .7rem; font-weight: 700; text-transform: uppercase;
@@ -471,12 +510,64 @@
     </div>
   </div>
 
+  <!-- FILTRES -->
+  <div id="filter-bar">
+    <div class="filter-row">
+      <!-- Filtre date -->
+      <div class="filter-group">
+        <div class="filter-label">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Période
+        </div>
+        <div class="filter-chips" id="chips-date">
+          <button class="chip active" data-val="all">Tout</button>
+          <button class="chip" data-val="today">Aujourd'hui</button>
+          <button class="chip" data-val="week">Cette semaine</button>
+          <button class="chip" data-val="month">Ce mois</button>
+        </div>
+      </div>
+      <!-- Filtre sport -->
+      <div class="filter-group">
+        <div class="filter-label">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+          Sport
+        </div>
+        <div class="filter-chips" id="chips-sport">
+          <button class="chip active" data-val="all">Tous</button>
+        </div>
+      </div>
+      <!-- Filtre bookmaker -->
+      <div class="filter-group">
+        <div class="filter-label">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+          Bookmaker
+        </div>
+        <div class="filter-chips" id="chips-bm">
+          <button class="chip active" data-val="all">Tous</button>
+        </div>
+      </div>
+      <!-- Filtre type -->
+      <div class="filter-group">
+        <div class="filter-label">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Type
+        </div>
+        <div class="filter-chips" id="chips-type">
+          <button class="chip active" data-val="all">Tous</button>
+          <button class="chip" data-val="arb">Arb garanti</button>
+          <button class="chip" data-val="near_arb">Near-arb</button>
+        </div>
+      </div>
+    </div>
+    <div class="filter-count" id="filter-count"></div>
+  </div>
+
   <div class="section-label">Meilleures opportunités</div>
   <div id="arb-list">
     <div class="empty-state">
       <div class="es-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
       <div class="es-title">Connectez votre API</div>
-      <div class="es-sub">Double-cliquez sur le logo pour configurer l'URL de votre tunnel Cloudflare</div>
+      <div class="es-sub">Cliquez sur l'engrenage en haut à droite pour configurer l'URL de votre tunnel Cloudflare</div>
     </div>
   </div>
   <div class="app-footer" id="footer-status">En attente de connexion API</div>
@@ -732,25 +823,139 @@ function saveApi(){
   fetchData();
 }
 
+// ── Filtres persistants ──────────────────────────────────
+const FILTER_DEFAULTS = { date:'all', sport:'all', bm:'all', type:'all' };
+let _filters = JSON.parse(localStorage.getItem('sb_filters')||'{}');
+_filters = Object.assign({}, FILTER_DEFAULTS, _filters);
+
+function saveFilters(){ localStorage.setItem('sb_filters', JSON.stringify(_filters)); }
+
+function initChips(groupId, filterKey){
+  document.getElementById(groupId).querySelectorAll('.chip').forEach(c=>{
+    if(c.dataset.val === _filters[filterKey]) c.classList.add('active');
+    else c.classList.remove('active');
+    c.addEventListener('click', ()=>{
+      document.getElementById(groupId).querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+      c.classList.add('active');
+      _filters[filterKey] = c.dataset.val;
+      saveFilters();
+      applyFilters();
+    });
+  });
+}
+
+function buildDynamicChips(arbs){
+  // Sports disponibles
+  const sports = [...new Set(arbs.map(a=>a.sport))].sort();
+  const sc = document.getElementById('chips-sport');
+  // garde le bouton "Tous"
+  sc.innerHTML = '<button class="chip" data-val="all">Tous</button>';
+  sports.forEach(s=>{
+    const b = document.createElement('button');
+    b.className = 'chip sport-'+s;
+    b.dataset.val = s;
+    b.textContent = sportFr(s);
+    sc.appendChild(b);
+  });
+
+  // Bookmakers disponibles
+  const bms = [...new Set(arbs.flatMap(a=>a.bookmakers.split(' / ')))].sort();
+  const bc = document.getElementById('chips-bm');
+  bc.innerHTML = '<button class="chip" data-val="all">Tous</button>';
+  bms.forEach(b=>{
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.dataset.val = b;
+    btn.textContent = bmName(b);
+    bc.appendChild(btn);
+  });
+
+  // Ré-applique les sélections sauvegardées
+  initChips('chips-date',  'date');
+  initChips('chips-sport', 'sport');
+  initChips('chips-bm',    'bm');
+  initChips('chips-type',  'type');
+}
+
+function matchesFilters(r){
+  const now = new Date();
+
+  // Filtre date
+  if(_filters.date !== 'all' && r.date){
+    const d = new Date(r.date);
+    if(!isNaN(d)){
+      if(_filters.date === 'today'){
+        if(d.toDateString() !== now.toDateString()) return false;
+      } else if(_filters.date === 'week'){
+        const week = new Date(now); week.setDate(now.getDate()+7);
+        if(d > week) return false;
+      } else if(_filters.date === 'month'){
+        const month = new Date(now); month.setMonth(now.getMonth()+1);
+        if(d > month) return false;
+      }
+    }
+  }
+
+  if(_filters.sport !== 'all' && r.sport !== _filters.sport) return false;
+  if(_filters.bm    !== 'all' && !r.bookmakers.split(' / ').includes(_filters.bm)) return false;
+  if(_filters.type  !== 'all' && r.status !== _filters.type) return false;
+
+  return true;
+}
+
+function applyFilters(){
+  const filtered = _arbData.filter(matchesFilters);
+  const total    = _arbData.length;
+  const shown    = filtered.length;
+
+  // Compteur
+  const fc = document.getElementById('filter-count');
+  if(total){
+    const hasActive = Object.values(_filters).some(v=>v!=='all');
+    fc.innerHTML = hasActive
+      ? `<strong>${shown}</strong> résultat${shown!==1?'s':''} sur ${total} · <span style="cursor:pointer;color:var(--yellow);text-decoration:underline" onclick="resetFilters()">Réinitialiser</span>`
+      : `<strong>${total}</strong> opportunité${total!==1?'s':''}`;
+  } else { fc.innerHTML = ''; }
+
+  renderArbCards(filtered);
+}
+
+function resetFilters(){
+  _filters = {...FILTER_DEFAULTS};
+  saveFilters();
+  ['chips-date','chips-sport','chips-bm','chips-type'].forEach(id=>{
+    document.getElementById(id).querySelectorAll('.chip').forEach(c=>{
+      c.classList.toggle('active', c.dataset.val==='all');
+    });
+  });
+  applyFilters();
+}
+
 // ── Render Arbitrages ────────────────────────────────────
 let _arbData = [];
 function renderArbitrages(arbs){
   _arbData = arbs;
-  const el = document.getElementById('arb-list');
-  // Badge
   const badge = document.getElementById('nav-badge');
   if(arbs.length){ badge.textContent=arbs.length; badge.style.display='block'; }
   else { badge.style.display='none'; }
+  buildDynamicChips(arbs);
+  applyFilters();
+}
 
+function renderArbCards(arbs){
+  const el = document.getElementById('arb-list');
   if(!arbs.length){
+    const hasFilters = Object.values(_filters).some(v=>v!=='all');
     el.innerHTML=`<div class="empty-state">
       <div class="es-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><line x1="8" y1="11" x2="14" y2="11"/></svg></div>
-      <div class="es-title">Aucun arbitrage détecté</div>
-      <div class="es-sub">Le scan tourne en arrière-plan. Prochain rafraîchissement dans 60s.</div>
+      <div class="es-title">${hasFilters?'Aucun résultat pour ces filtres':'Aucun arbitrage détecté'}</div>
+      <div class="es-sub">${hasFilters?'<span style="cursor:pointer;color:var(--yellow)" onclick="resetFilters()">Réinitialiser les filtres</span>':'Le scan tourne en arrière-plan. Prochain rafraîchissement dans 1h.'}</div>
     </div>`;
     return;
   }
   el.innerHTML = arbs.map((r,i)=>{
+    // index dans _arbData pour le calculateur
+    const realIdx = _arbData.indexOf(r);
     const teams = r.match.split(' vs ');
     const t1 = tr(teams[0]||'');
     const t2 = tr(teams[1]||'');
@@ -781,7 +986,7 @@ function renderArbitrages(arbs){
       } catch(e){ return ''; }
     })() : '';
 
-    return `<div class="match-card" onclick="openCalc(${i})">
+    return `<div class="match-card" onclick="openCalc(${realIdx})">
       <div class="match-card-header">
         <div class="competition-tag">${sportIcon(r.sport)} ${sportFr(r.sport)}${dateStr?' · '+dateStr:''}</div>
         <span class="sport-badge ${sportClass}">${MARKET_LABEL[r.sport]||'1X2'}</span>
@@ -1118,6 +1323,9 @@ function updateCalc(){
 }
 
 // ── Init ─────────────────────────────────────────────────
+// Initialise les chips fixes (date et type) avec la sélection sauvegardée
+initChips('chips-date', 'date');
+initChips('chips-type', 'type');
 fetchData();
 setInterval(fetchData, 60000);
 </script>
