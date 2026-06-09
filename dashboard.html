@@ -14,10 +14,10 @@
   <link rel="icon" type="image/png" sizes="16x16" href="icon-16.png" />
   <style>
     :root {
-      --bg: #0a0c11;
-      --card: #13161f;
-      --card2: #1a1e2a;
-      --border: #252836;
+      --bg: #07080f;
+      --card: rgba(16, 18, 30, 0.82);
+      --card2: rgba(22, 25, 40, 0.75);
+      --border: rgba(255,255,255,0.07);
       --yellow: #f5c518;
       --yellow-dark: #c9a010;
       --green: #22c55e;
@@ -31,8 +31,20 @@
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
+
+    /* Fond radiant fixe derrière tout le contenu */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: -1;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 0%,   rgba(88, 28, 220, 0.45) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 10%,  rgba(30, 20, 160, 0.35) 0%, transparent 55%),
+        radial-gradient(ellipse 70% 70% at 50% 100%, rgba(20, 10, 100, 0.5)  0%, transparent 65%),
+        linear-gradient(175deg, #0d0618 0%, #060818 35%, #050a1a 65%, #04060f 100%);
+    }
+
     body {
-      background: var(--bg);
+      background: transparent;
       color: var(--text);
       font-family: -apple-system, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
       min-height: 100vh;
@@ -44,8 +56,10 @@
     /* ── HEADER ─────────────────────────────── */
     header {
       position: sticky; top: 0; z-index: 50;
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
+      background: rgba(10, 9, 22, 0.75);
+      backdrop-filter: blur(20px) saturate(1.4);
+      -webkit-backdrop-filter: blur(20px) saturate(1.4);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
       height: var(--header-h);
       display: flex; align-items: center;
       padding: 0 16px; gap: 10px;
@@ -187,7 +201,10 @@
 
     /* ── MATCH CARD ──────────────────────────── */
     .match-card {
-      background: var(--card); border: 1px solid var(--border);
+      background: var(--card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
       border-radius: 16px; margin-bottom: 10px; overflow: hidden;
       cursor: pointer; transition: border-color .15s, background .15s;
       -webkit-tap-highlight-color: transparent;
@@ -241,9 +258,9 @@
       border-top: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between;
       padding: 8px 14px;
-      background: #0f120a;
+      background: rgba(8, 14, 6, 0.6);
     }
-    .match-footer.near-arb { background: #130e00; border-top-color: #3d2e00; }
+    .match-footer.near-arb { background: rgba(20, 14, 0, 0.6); border-top-color: rgba(61,46,0,0.5); }
     .gain-badge {
       font-size: .78rem; font-weight: 800; color: var(--green);
       display: flex; align-items: center; gap: 5px;
@@ -332,7 +349,10 @@
     /* ── BOTTOM NAV ──────────────────────────── */
     nav {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
-      background: var(--card); border-top: 1px solid var(--border);
+      background: rgba(8, 7, 20, 0.8);
+      backdrop-filter: blur(20px) saturate(1.4);
+      -webkit-backdrop-filter: blur(20px) saturate(1.4);
+      border-top: 1px solid rgba(255,255,255,0.06);
       display: flex; height: var(--nav-h);
       padding-bottom: env(safe-area-inset-bottom);
     }
